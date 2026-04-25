@@ -1,0 +1,103 @@
+<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Fluent Chaining</p>
+# Fluent API and Component Architecture
+
+Building UI or Discord interactions using classic `discord.js` often forces you into excessive "Builder" chaining (ActionRowBuilder, ButtonBuilder, EmbedBuilder). The Disapp `packages/core` provides a much smoother, single-line architecture.
+
+<br />
+
+## Next-Gen Components (Components V2)
+
+We simplify the extensive button and menu construction process with the **Disapp V2 Components** structure. There's no longer a need to spread your row logic across massive file blocks.
+
+### Constructing Buttons via the `v2` Object
+
+You can design side-by-side buttons seamlessly using the `ComponentsV2Builder` (`v2`) module provided by the `core` framework.
+
+```typescript
+import { v2 } from '@disapp/core';
+import { ButtonStyle } from 'discord.js';
+
+// An 18-line DJS structure converts into this with Disapp:
+const components = v2()
+  .button('accept_terms', 'Accept Terms', ButtonStyle.Success, '✅')
+  .button('decline', 'Decline', ButtonStyle.Danger)
+  .build();
+
+await interaction.reply({
+  content: 'Do you accept the agreement?',
+  components: components // Action rows are compiled and ready.
+});
+```
+
+<Callout type="info" title="The v2 Build Method">
+The moment `.build()` is invoked, it automatically distributes the provided buttons into 5-limit ActionRowBuilder packages (gracefully handling overflows if you provide more than 5 buttons).
+</Callout>
+
+<br />
+
+## Message Automation (Message Chunker)
+
+Discord enforces a strict character limit (maximum 2000 characters). If you exceed this limit when logging or sending long texts, a `DiscordAPIError` is thrown.
+
+Disapp contains a built-in `MessageChunker` and `AutoChunker` to bypass these limitations automatically.
+
+<Steps>
+  <Step title="Extract the String" stepNumber="1">
+    Retrieve your massive data output:
+    ```typescript
+    const massiveLog = "............. (5000 lines of text)";
+    ```
+  </Step>
+
+  <Step title="Process via AutoChunker" stepNumber="2">
+    Pass the raw payload into the module interface:
+    ```typescript
+    import { chunkMessage } from '@disapp/core';
+
+    // Safely slices the messages according to the 2000 character boundaries.
+    const messageArray = chunkMessage(massiveLog, { maxLength: 1990 });
+    ```
+  </Step>
+
+  <Step title="Sequential Output" stepNumber="3">
+    Loop through your paginated chunks:
+    ```typescript
+    for (const chunk of messageArray) {
+      await interaction.channel.send(chunk);
+    }
+    ```
+  </Step>
+</Steps>
+
+<br />
+
+## InteractionHandler and Event Listeners
+
+We've discontinued the need to build complex conditions like `if (interaction.customId === 'id')` when listening for "Interaction (Click)" triggers gathered from your buttons:
+
+```typescript
+import { InteractionHandler } from '@disapp/core';
+
+// Construct your Button and Menu handler
+const handler = new InteractionHandler();
+
+// Map Button Actions
+handler.registerButton('accept_terms', async (interaction) => {
+    await interaction.reply("Terms accepted!");
+});
+
+handler.registerButton('decline', async (interaction) => {
+    await interaction.reply("Declined.");
+});
+
+// Execute the Handler within your Event listener
+export default class InteractionCreateEvent extends Event {
+    async execute(client, interaction) {
+        if (!interaction.isButton()) return;
+        
+        await handler.execute(interaction);
+    }
+}
+```
+
+By decoupling your interaction systems into distinct function callbacks, your codebase remains clean, isolated, and highly "Fluent".

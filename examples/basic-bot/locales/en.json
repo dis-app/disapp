@@ -1,0 +1,73 @@
+{
+  "language": {
+    "switched": "✅ Language switched to {lang}"
+  },
+  "buttons": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "yes": "Yes",
+    "no": "No",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "refresh": "Refresh",
+    "close": "Close"
+  },
+  "messages": {
+    "welcome": "Welcome to the bot!",
+    "success": "✅ Operation successful!",
+    "error": "❌ An error occurred!",
+    "loading": "⏳ Loading...",
+    "notFound": "❌ Not found!"
+  },
+  "errors": {
+    "noPermission": "❌ You don't have permission to use this command!",
+    "userNotFound": "❌ User not found!",
+    "roleNotFound": "❌ Role not found!",
+    "commandError": "❌ An error occurred while executing this command!",
+    "invalidArgument": "❌ Invalid argument: {arg}"
+  },
+  "commands": {
+    "ping": {
+      "description": "Bot latency",
+      "response": "🏓 Pong! {latency}ms"
+    },
+    "help": {
+      "description": "Show help menu",
+      "title": "📚 Help Menu",
+      "general": "🏠 General",
+      "moderation": "⚙️ Moderation",
+      "commands": "Available commands:"
+    },
+    "language": {
+      "description": "Change bot language",
+      "title": "Select Language",
+      "current": "Current language",
+      "success": "✅ Language set to {language}"
+    },
+    "ban": {
+      "description": "Ban a user",
+      "success": "✅ **{user}** has been banned.",
+      "reason": "📝 Reason: {reason}",
+      "error": "❌ Failed to ban user: {error}"
+    },
+    "kick": {
+      "description": "Kick a user",
+      "success": "✅ **{user}** has been kicked.",
+      "reason": "📝 Reason: {reason}",
+      "error": "❌ Failed to kick user: {error}"
+    },
+    "mute": {
+      "description": "Mute a user",
+      "success": "🔇 **{user}** has been muted for **{duration}** minutes.",
+      "reason": "📝 Reason: {reason}",
+      "error": "❌ Failed to mute user: {error}"
+    },
+    "role": {
+      "description": "Give or remove role from user",
+      "given": "✅ **{role}** role given to **{user}**",
+      "removed": "✅ **{role}** role removed from **{user}**",
+      "error": "❌ Failed to manage role: {error}"
+    }
+  }
+}

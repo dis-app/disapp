@@ -1,0 +1,95 @@
+# Quick Start
+
+Build a Discord bot with Disapp in 5 minutes.
+
+## Step 1: Clone & Install
+
+```bash
+git clone https://github.com/dis-app/disapp.git
+cd disapp
+pnpm install
+pnpm build:core
+```
+
+## Step 2: Configure
+
+Create `examples/basic-bot/.env`:
+
+```bash
+DISCORD_TOKEN=your_token
+CLIENT_ID=your_client_id
+GUILD_ID=your_guild_id
+```
+
+## Step 3: Run
+
+```bash
+pnpm dev:bot
+```
+
+## Step 4: Test
+
+In Discord, type `/ping` and see your bot respond!
+
+## Create a Custom Command
+
+Create `examples/basic-bot/src/commands/greet.ts`:
+
+```typescript
+import { Command, msg, embed } from '@disapp/core';
+import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+
+export default class GreetCommand extends Command {
+  constructor() {
+    super({
+      name: 'greet',
+      description: 'Greet someone',
+      data: new SlashCommandBuilder()
+        .setName('greet')
+        .setDescription('Greet someone')
+        .addUserOption(option =>
+          option
+            .setName('user')
+            .setDescription('User to greet')
+            .setRequired(true)
+        ),
+      execute: async () => {},
+    });
+  }
+
+  async execute(interaction) {
+    const user = interaction.options.getUser('user');
+    
+    const message = msg()
+      .setContent(`Hello ${user}!`)
+      .buttons(
+        { label: 'Wave', id: 'wave', style: ButtonStyle.Primary, emoji: '👋' },
+        { label: 'Hug', id: 'hug', style: ButtonStyle.Success, emoji: '🤗' }
+      )
+      .addEmbed(
+        embed()
+          .success('Greeting', `${interaction.user} greeted ${user}!`)
+          .setThumbnail(user.displayAvatarURL())
+      )
+      .build();
+    
+    await interaction.reply(message);
+  }
+}
+```
+
+Save and watch it auto-reload! No restart needed.
+
+## What Just Happened?
+
+1. **Auto-loaded**: Command automatically loaded from file
+2. **Auto-registered**: Command synced to Discord
+3. **Hot reload**: Changes applied instantly
+4. **Type-safe**: Full TypeScript support
+
+## Next Steps
+
+- [Fluent API](/docs/fluent-api) - Master the fluent API
+- [Components](/docs/components) - Build interactive messages
+- [Hot Reload](/docs/hot-reload) - Understand auto-reload
+- [Database](/docs/database) - Use the database

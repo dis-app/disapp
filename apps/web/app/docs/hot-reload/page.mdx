@@ -1,0 +1,52 @@
+<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Developer Productivity</p>
+# Hot Reload Architecture
+
+Restarting the Discord instance frequently when tweaking parameters forces prolonged development friction and annoying Discord API delays (Rate limiting risks over login hooks). Thanks entirely to our embedded **HotReload** infrastructure, when you save a file (CTRL + S), the core engine strictly reinjects the file without breaking connections.
+
+<br />
+
+## Invoking HotReload Streams
+
+The instances running inside `DisappClient` do not configure the listeners automatically to prevent production breaches. However, mapping development nodes manually is seamless.
+
+```typescript
+import { DisappClient, HotReload } from '@disapp/core';
+
+async function start() {
+    const client = new DisappClient({ /* ... parameters */ });
+    
+    // Process HotReload dependencies securely within development contexts exclusively
+    if (process.env.NODE_ENV === 'development') {
+        const hotReload = new HotReload(client);
+        
+        hotReload.watchCommands();
+        hotReload.watchEvents();
+        
+        client.logger.info("🔥 HotReload engine is operational!");
+    }
+
+    await client.start();
+}
+```
+
+<br />
+
+## What Processes Are Tracked?
+
+<CardGroup>
+  <Card title="Commands Core" icon="terminal">
+    Modifying any file nested inside `commands/` invokes a deep reload utilizing the `CommandRegistry`. Disapp dynamically purges cached references and syncs directly **bypassing complete resets.**
+  </Card>
+  <Card title="Event Dispatchers" icon="zap">
+    Altered logic structures resting beneath `events/` sever the pre-existing event linkage mapped across `client.on` while routing incoming actions to the newer deployment seamlessly.
+  </Card>
+  <Card title="Localization Output (i18n)" icon="globe">
+    JSON parameters saved beneath `locales/` instantly reroute against existing mappings, forcing `I18n` logic algorithms to recompile memory mappings. (Utilizing Alpha implementation cycles)
+  </Card>
+</CardGroup>
+
+<br />
+
+<Callout type="warning" title="Production Targets">
+Do ensure deployments against active server nodes (VPS, Hosting deployments) trigger under production modes correctly. `HotReload` minimizes development scope but produces intensive system overhead likely provoking massive Memory Leaks globally.
+</Callout>

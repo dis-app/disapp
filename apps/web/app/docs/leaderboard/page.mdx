@@ -1,0 +1,69 @@
+<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Custom Output Models</p>
+# Leaderboard Visual Builder
+
+Constructing formatting algorithms and rendering Leaderboards represent arguably the most tedious processes in Discord bot configuration. Splitting logic arrays, sanitizing strings, or handling page overflows usually consume excessive development time.
+
+The `packages/core` features a native `LeaderboardBuilder` engine that instantly casts incoming dataset arrays into visually gorgeous layouts in microseconds.
+
+<br />
+
+## Initializing LeaderboardBuilder
+
+Consider that you've derived an oversized User array featuring Experience levels utilizing our internal `UserStatsRepository`.
+
+```typescript
+import { LeaderboardBuilder, UserStatsRepository } from '@disapp/core';
+
+// ... execute runtime context
+
+// Yield the top 10 players based exclusively via XP values
+const statsRepo = new UserStatsRepository();
+const top10 = await statsRepo.getTopPlayers(10); 
+
+// Pipeline structure formulating the resulting Embed structure
+const lb = new LeaderboardBuilder(top10)
+    .setTitle("🌟 Top Active Players")
+    // Dynamically format metrics applied next to each individual iteration line
+    .setFormat((player, index) => {
+        const medal = index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🔹';
+        return `${medal} **${index + 1}. <@${player.userId}>** - ${player.xp} XP\n`;
+    })
+    .buildEmbed(); // Assembles immediately into an Embed structure.
+
+await interaction.reply({ embeds: [lb] });
+```
+
+<br />
+
+## VoiceLeaderboardBuilder Construct
+
+Standard iterations usually miss out regarding specialized arrays tracking purely "Voice Channel Interactions". Those usually rely on native tracking components like (`VoiceActivityRepository`).
+
+Leveraging `VoiceLeaderboardBuilder` enables instant formatting strings converting arbitrary milliseconds into readable output frames like "14 Hours 20 Minutes" without logic overhead.
+
+<Steps>
+  <Step title="Extract Local Data" stepNumber="1">
+    ```typescript
+    const voiceRepo = new VoiceActivityRepository();
+    // Resolve recent weekly metrics bound against your Guild
+    const voiceData = await voiceRepo.getWeeklyVoiceStats(interaction.guildId);
+    ```
+  </Step>
+
+  <Step title="Deploy via Engine" stepNumber="2">
+    ```typescript
+    import { VoiceLeaderboardBuilder } from '@disapp/core';
+
+    // Dispatches string translations instantly processing epoch variables
+    const voiceLb = new VoiceLeaderboardBuilder(voiceData)
+      .setTitle("🎙️ Weekly Voice Metrics")
+      .buildEmbed();
+      
+    await interaction.reply({ embeds: [voiceLb] });
+    ```
+  </Step>
+</Steps>
+
+<Callout type="info" title="Entirely Automatic">
+`VoiceLeaderboardBuilder` filters arbitrary durations down to minute thresholds executing day/hour logic automatically prior to serving it inside your interface. Additional formatting commands are heavily mitigated.
+</Callout>

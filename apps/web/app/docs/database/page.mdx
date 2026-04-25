@@ -1,0 +1,90 @@
+<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Internal Database Layer</p>
+# Database & Repositories
+
+Disapp Core utilizes a **Repository Pattern** to eradicate the messy boilerplate typically found in standard database drivers, introducing an asynchronous memory layer to your bot. Thanks to its native structures, generating tables or data architectures takes merely seconds.
+
+<br />
+
+## Spinning Up the Database
+
+To synchronize tables or open your ongoing connections immediately when your Discord bot executes, you must invoke the `initializeDatabase` method stemming from the core library.
+
+```typescript
+import { initializeDatabase } from '@disapp/core';
+
+async function startBot() {
+    // Configures and securely connects the database (utilizing Environment variables)
+    await initializeDatabase();
+
+    // Proceed to launch your bot
+    await client.start();
+}
+
+startBot();
+```
+
+<br />
+
+## Native Repository Classes
+
+As part of the Core package layout, the 4 most prominently needed data tables in the Discord ecosystem are presented to you fully configured (equipped with ORM mappings):
+
+<CardGroup>
+  <Card title="UserRepository" icon="user">
+    Manages individualized user data streams. Generally utilized for resolving credits, experience points (XP), and comprehensive profile statuses.
+  </Card>
+  <Card title="GuildRepository" icon="search">
+    Preserves server-wide parameters (Guild) inherently supporting custom prefix logs, module scopes, and configuration maps.
+  </Card>
+  <Card title="VoiceActivityRepository" icon="upload">
+    Documents analytical session timestamps revealing exactly how long users persist inside of vocal channels.
+  </Card>
+  <Card title="UserStatsRepository" icon="download">
+    Integrates metrics such as Level scaling systems and compounded message rates effortlessly into a permanent layer.
+  </Card>
+</CardGroup>
+
+<br />
+
+## Creating or Reading Entries
+
+You can invoke any native repository directly into your command scope, issuing immediate CRUD (Create, Read, Update, Delete) directives seamlessly.
+
+```typescript
+import { UserRepository } from '@disapp/core';
+
+async execute(interaction) {
+    const userRepo = new UserRepository();
+
+    // Discover the current Discord user in the database (Automatically generates entry if absent)
+    let userData = await userRepo.findOrCreate(interaction.user.id);
+
+    // Append 50 Credits
+    userData.credits += 50;
+    await userRepo.update(userData);
+
+    await interaction.reply(`Your revised balance is: ${userData.credits}`);
+}
+```
+
+<Callout type="warning" title="ORM Integrations">
+Disapp Core by default possesses the necessary traits to be fashioned onto Drizzle or Prisma schemas. Do ensure that your respective SQL drivers (PostgreSQL, MySQL, etc.) and `.env` references are precisely provided; failure to do so will yield a `ConnectionTimeout` when the `Repository` entity is dispatched.
+</Callout>
+
+### Defense via `RequireDatabase` Middleware
+
+If operations strictly hinge on database availability, you can secure and protect your endpoints by executing the native middleware to prevent crashes upon database dropout faults.
+
+```typescript
+import { Command, RequireDatabase } from '@disapp/core';
+
+export default class PayCommand extends Command {
+    constructor() {
+        super({
+            name: "pay",
+            // If the database has severed connected ties or crashed, this command halts execution.
+            middlewares: [new RequireDatabase()] 
+        });
+    }
+}
+```

@@ -1,0 +1,209 @@
+# Getting Started
+
+Get started with Disapp in minutes and build your first Discord bot.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- **Node.js 18+** installed
+- **PNPM** package manager (`npm install -g pnpm`)
+- A **Discord Bot Token** from [Discord Developer Portal](https://discord.com/developers/applications)
+
+## Installation
+
+Clone the Disapp repository:
+
+```bash
+git clone https://github.com/dis-app/disapp.git
+cd disapp
+```
+
+Install dependencies:
+
+```bash
+pnpm install
+```
+
+Build the core package:
+
+```bash
+pnpm build:core
+```
+
+## Configuration
+
+Create a `.env` file in the `examples/basic-bot` directory:
+
+```bash
+DISCORD_TOKEN=your_bot_token_here
+CLIENT_ID=your_application_id_here
+GUILD_ID=your_guild_id_here
+DATABASE_URL=your_postgres_url_here
+```
+
+### Getting Your Bot Token
+
+1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
+2. Create a new application
+3. Go to the "Bot" section
+4. Click "Reset Token" and copy your token
+5. Enable "Message Content Intent" under Privileged Gateway Intents
+
+### Getting Your Client ID
+
+Your Client ID is the Application ID found on the "General Information" page.
+
+### Getting Your Guild ID
+
+1. Enable Developer Mode in Discord (User Settings → Advanced → Developer Mode)
+2. Right-click your server and select "Copy Server ID"
+
+## Your First Bot
+
+The example bot is already set up. Let's run it:
+
+```bash
+pnpm dev:bot
+```
+
+You should see:
+
+```
+[INFO] Bot started successfully
+[INFO] Logged in as YourBot#1234
+[INFO] Syncing 6 guild commands...
+[INFO] 6 guild commands synced successfully
+```
+
+## Create Your First Command
+
+Create a new file `examples/basic-bot/src/commands/hello.ts`:
+
+```typescript
+import { Command, successEmbed } from '@disapp/core';
+import { SlashCommandBuilder } from 'discord.js';
+
+export default class HelloCommand extends Command {
+  constructor() {
+    super({
+      name: 'hello',
+      description: 'Say hello',
+      data: new SlashCommandBuilder()
+        .setName('hello')
+        .setDescription('Say hello')
+        .addStringOption(option =>
+          option
+            .setName('name')
+            .setDescription('Your name')
+            .setRequired(false)
+        ),
+      execute: async () => {},
+    });
+  }
+
+  async execute(interaction) {
+    const name = interaction.options.getString('name') || 'World';
+    
+    await interaction.reply({
+      embeds: [successEmbed('Hello!', `Hello, ${name}! 👋`)]
+    });
+  }
+}
+```
+
+Save the file and watch the magic happen:
+
+```
+[INFO] File changed: hello.ts
+[INFO] Command loaded: hello
+[INFO] Syncing 7 guild commands...
+[INFO] 7 guild commands synced successfully
+[INFO] Hot reload completed
+```
+
+Your command is now available in Discord! No restart needed.
+
+## Understanding the Structure
+
+### DisappClient
+
+The main client that extends Discord.js Client:
+
+```typescript
+import { DisappClient } from '@disapp/core';
+import path from 'path';
+
+const client = new DisappClient({
+  config: {
+    token: process.env.DISCORD_TOKEN,
+    clientId: process.env.CLIENT_ID,
+    guildId: process.env.GUILD_ID,
+    commandsPath: path.join(__dirname, 'commands'),
+    eventsPath: path.join(__dirname, 'events'),
+  },
+});
+
+await client.start();
+```
+
+### Commands
+
+Commands extend the `Command` class:
+
+```typescript
+export default class MyCommand extends Command {
+  constructor() {
+    super({
+      name: 'mycommand',
+      description: 'My command',
+      data: new SlashCommandBuilder()
+        .setName('mycommand')
+        .setDescription('My command'),
+      execute: async () => {},
+      cooldown: 5,
+    });
+  }
+
+  async execute(interaction) {
+  }
+}
+```
+
+### Events
+
+Events extend the `Event` class:
+
+```typescript
+import { Event } from '@disapp/core';
+
+export default class ReadyEvent extends Event {
+  constructor() {
+    super({
+      name: 'ready',
+      once: true,
+      execute: async () => {},
+    });
+  }
+
+  async execute(client) {
+    console.log(`Logged in as ${client.user.tag}`);
+  }
+}
+```
+
+## What's Next?
+
+Now that you have a working bot, explore these topics:
+
+- [Fluent API](/docs/fluent-api) - Learn the powerful fluent API
+- [Components](/docs/components) - Build interactive messages
+- [Hot Reload](/docs/hot-reload) - Understand hot reload and auto-registry
+- [Database](/docs/database) - Use the built-in database
+- [API Reference](/docs/api) - Complete API documentation
+
+## Need Help?
+
+- Check the [examples](https://github.com/dis-app/disapp/tree/main/examples/basic-bot)
+- Read the [API Reference](/docs/api)
+- Open an issue on [GitHub](https://github.com/dis-app/disapp/issues)

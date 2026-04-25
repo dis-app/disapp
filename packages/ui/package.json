@@ -1,0 +1,19 @@
+{
+  "name": "@disapp/ui",
+  "version": "1.0.0",
+  "description": "Shared UI components for Disapp",
+  "main": "index.tsx",
+  "types": "index.tsx",
+  "scripts": {
+    "lint": "eslint *.tsx"
+  },
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.3.3"
+  }
+}

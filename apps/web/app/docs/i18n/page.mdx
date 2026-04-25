@@ -1,0 +1,82 @@
+<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Multi-Language Ecosystem</p>
+# Built-In Locales (i18n)
+
+If you are expanding globally or catering to multilingual communities, you can leverage Disapp's deeply integrated **i18n (Internationalization)** mechanism to dynamically deploy responses depending on the application language registered by the Discord user.
+
+<br />
+
+## How it Works
+
+Disapp Core natively features an `I18n` class. Utilizing local directories, it evaluates files ending in `.json` and streams their payload immediately into cached Memory (RAM), yielding lightning-fast language swaps.
+
+<Steps>
+  <Step title="Establish Directory Locales" stepNumber="1">
+    Navigate to your root directory and deploy a folder titled `locales` alongside configuration entries such as `en-US.json` and `tr.json`.
+
+    ```json
+    // locales/en-US.json
+    {
+      "hello": "Hello World!",
+      "welcomeUser": "Welcome to the server, {user}"
+    }
+
+    // locales/tr.json
+    {
+      "hello": "Merhaba Dünya!",
+      "welcomeUser": "Sunucuya hoş geldin, {user}"
+    }
+    ```
+  </Step>
+
+  <Step title="Invoke the i18n Integrator" stepNumber="2">
+    In the primary gateway (`index.ts`) of your bot context, instantiate the module.
+
+    ```typescript
+    import { I18n } from '@disapp/core';
+    import path from 'path';
+
+    // Asynchronously dispatch locales independently alongside the DisappClient
+    const i18n = new I18n({
+      localesPath: path.join(__dirname, 'locales'),
+      defaultLocale: 'en-US'  // Dictates a fail-safe fallback route
+    });
+
+    await i18n.loadLocales();
+    ```
+  </Step>
+
+  <Step title="Resolve Text Chains" stepNumber="3">
+    Within the `execute` block context of your commands, generating a localization is trivial:
+
+    ```typescript
+    async execute(interaction) {
+      // Discern language dynamically through interaction properties
+      const locale = interaction.locale;
+
+      // Extract via the string key, letting i18n inject the contextual mapping
+      const replyMessage = i18n.translate(locale, 'welcomeUser', { 
+        user: interaction.user.username 
+      });
+
+      await interaction.reply(replyMessage);
+    }
+    ```
+  </Step>
+</Steps>
+
+<br />
+
+## The I18nHelper Interface
+
+Instead of blindly invoking translations, if you desire deeper resolutions utilizing database mappings for forced languages outshining discord presets, you should instantiate `I18nHelper`.
+
+```typescript
+import { I18nHelper } from '@disapp/core';
+
+const userPreferredLanguage = await db.getUserLanguage(interaction.user.id);
+const finalLocale = I18nHelper.resolveLocale(interaction.locale, userPreferredLanguage);
+```
+
+<Callout type="info" title="Automatic Fallback Routing">
+If a user happens to interact with the bot using German (`de`) and you primarily facilitate `tr` and `en-US`, the execution chain won't shatter; it seamlessly routes backward toward your target `defaultLocale` designation.
+</Callout>

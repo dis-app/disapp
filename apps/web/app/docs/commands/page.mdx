@@ -1,0 +1,97 @@
+<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Advanced Commands</p>
+# Command Management and Middleware
+
+The command engine provided by Disapp eliminates the need for classic if/else loops and repetitive permission checks. Disapp offers an entirely **Class-based (OOP)** and **Middleware-supported** Slash Command infrastructure.
+
+<br />
+
+## Base Slash Command
+
+To create a new command, simply extend the `Command` class originating from the core package. Its internal constructor configuration is automatically uploaded to the Discord API.
+
+```typescript
+import { Command } from '@disapp/core';
+import { SlashCommandBuilder } from 'discord.js';
+
+export default class AvatarCommand extends Command {
+  constructor() {
+    super({
+      name: 'avatar',
+      description: 'Displays your or someone else\'s avatar',
+      data: new SlashCommandBuilder()
+        .setName('avatar')
+        .setDescription('Displays your or someone else\'s avatar')
+        .addUserOption((opt) => opt.setName('target').setDescription('User')),
+    });
+  }
+
+  async execute(interaction: CommandInteraction) {
+    const target = interaction.options.getUser('target') || interaction.user;
+    
+    await interaction.reply({ 
+      content: `${target.username}'s avatar: ${target.displayAvatarURL()}`
+    });
+  }
+}
+```
+
+<br />
+
+## Decorator and Middleware System
+
+The true revolution in Disapp's command management lies in its **Middleware** pipeline constructed for permission checks and guards. From catching error messages (ErrorHandler) to Rate Limiting, everything can be resolved in the outer layer.
+
+<Callout type="warning" title="ATTENTION">
+Middleware classes execute BEFORE the `execute` block is triggered. If the condition is not met, the function is never executed and an Exception is safely handled.
+</Callout>
+
+### `middlewares` Integration
+By providing a `middlewares` array into the super constructor, you directly declare what constraints your function is subjected to.
+
+```typescript
+import { 
+  Command, 
+  OnlyAdmin, 
+  Cooldown, 
+  RateLimit,
+  OwnerOnly 
+} from '@disapp/core';
+
+export default class BanCommand extends Command {
+  constructor() {
+    super({
+      name: 'ban',
+      description: 'Permanently bans the user.',
+      middlewares: [
+        new OnlyAdmin(),
+        new Cooldown(15), // This command can be used once every 15 seconds
+        new RateLimit(3, 60000) // Rate limited to a max of 3 times per minute
+      ],
+      data: new SlashCommandBuilder()
+        .setName('ban')
+        .setDescription('Bans the user from the server.'),
+    });
+  }
+
+  async execute(interaction) {
+    // You do NOT NEED to check for permissions, cooldowns, or admin status here!
+    // If Disapp did not resolve these checks during the middleware phase, the code will not reach this block.
+    await interaction.reply("User has been banned.");
+  }
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Available Core Middlewares">
+    Below are the structures available within `core/src/middleware/CommandMiddleware.ts`:
+    * `OnlyAdmin`: Restricts access to server administrators.
+    * `RequirePermission`: Requires specific Discord permissions (e.g., ManageChannels).
+    * `Cooldown`: Rate limits based on seconds per user.
+    * `RequireDatabase` & `RequireGuild`: Validates the presence of custom tables or server constraints.
+    * `OwnerOnly`: Can only be triggered by the bot owner defined in the config.
+    * `RateLimit`: Overarching rate limit controls across specified time intervals.
+  </Accordion>
+  <Accordion title="Validator Integration">
+    For parameter checks and Regex filtering, you can reliably sanitize incoming inputs via the `Validator` class.
+  </Accordion>
+</AccordionGroup>

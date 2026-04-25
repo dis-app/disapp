@@ -1,0 +1,23 @@
+{
+  "name": "basic-bot",
+  "version": "1.0.0",
+  "description": "Basic Discord bot example using Disapp",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc && node -e \"require('fs').cpSync('locales', 'dist/locales', {recursive: true})\"",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@disapp/core": "workspace:*",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@disapp/config": "workspace:*",
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

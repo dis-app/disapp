@@ -1,0 +1,88 @@
+<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Event Management</p>
+# Event Listeners
+
+To hook onto any background actions happening within your bot—such as message creation (`messageCreate`), voice channel state updates (`voiceStateUpdate`), or interaction handling (`interactionCreate`)—you utilize Disapp's robust Event module.
+
+Disapp seamlessly catches the Event classes you construct, registers them, and passes them along to their corresponding Discord API hook methods.
+
+<br />
+
+## Constructing an Event
+
+To create an Event, you begin by structuring your module using the `Event` class originating from the `core` package or binding directly against `DisappClient` typings.
+
+Every file dropped under the `events/` subdirectory is scanned by the `DisappClient` upon initialization.
+
+```typescript
+import { Event, DisappClient } from '@disapp/core';
+import { Events, PresenceUpdateStatus, ActivityType } from 'discord.js';
+
+export default class ReadyEvent extends Event {
+  constructor() {
+    super({
+      // State the name of the event (e.g., Events.ClientReady in Discord.js)
+      name: Events.ClientReady,
+      // Should this event trigger only once (once) or continuously (on)?
+      once: true,
+    });
+  }
+
+  async execute(client: DisappClient) {
+    client.logger.info(`🔥 Successfully logged in as: ${client.user?.tag}`);
+
+    // Adjusting the bot's rich presence as a specific use case
+    client.user?.setPresence({
+      activities: [{ name: 'Running Disapp Core!', type: ActivityType.Playing }],
+      status: PresenceUpdateStatus.Online,
+    });
+  }
+}
+```
+
+<br />
+
+## VoiceTracker Implementation
+
+If you wish to measure tracking analytics on your Discord servers regarding voice channel activity (e.g., determining how many hours someone spent in voice mapping), you can use the `VoiceTracker` in conjunction with the Repository ecosystem inside Disapp Core.
+
+<Callout type="info" title="Voice Tracker Intents">
+For `VoiceTracker` to accurately record data, it is STRICTLY mandatory that `GatewayIntentBits.GuildVoiceStates` is provided to the client arrays when bootstrapping the bot to calculate session logs accurately.
+</Callout>
+
+### Listening to Voice Interactions via Events
+
+```typescript
+import { Event, VoiceTracker } from '@disapp/core';
+import { Events, VoiceState } from 'discord.js';
+
+export default class VoiceStateUpdateEvent extends Event {
+  constructor() {
+    super({
+      name: Events.VoiceStateUpdate,
+      once: false,
+    });
+  }
+
+  async execute(client, oldState: VoiceState, newState: VoiceState) {
+    // Feed the respective voice movements back into the VoiceTracker engine:
+    const voiceTracker = new VoiceTracker(client);
+    
+    await voiceTracker.handleVoiceStateUpdate(oldState, newState);
+  }
+}
+```
+
+<br />
+
+## i18n (Multi-Language) Listeners
+
+You can leverage the power of i18n within your Events to determine dynamic user languages (e.g., `en-US`, `tr`) instantly when a message is read or a `/command` interacts, responding in their localized variant.
+
+<AccordionGroup>
+  <Accordion title="Resolving Language During Interactions">
+    Utilizing the `I18nHelper` interface from the `core/src/i18n` module allows you to resolve the locale emitted by the user interacting with the message, overriding database parameters when necessary.
+  </Accordion>
+  <Accordion title="Binding the Error Handler">
+    To prevent crashes, it's advised to encapsulate Event executions in a `try-catch` block, routing any catastrophic exceptions directly to the `ErrorHandler.handle(error)` function.
+  </Accordion>
+</AccordionGroup>

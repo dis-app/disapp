@@ -1,0 +1,73 @@
+{
+  "language": {
+    "switched": "✅ Dil {lang} olarak değiştirildi"
+  },
+  "buttons": {
+    "confirm": "Onayla",
+    "cancel": "İptal",
+    "yes": "Evet",
+    "no": "Hayır",
+    "back": "Geri",
+    "next": "İleri",
+    "previous": "Önceki",
+    "refresh": "Yenile",
+    "close": "Kapat"
+  },
+  "messages": {
+    "welcome": "Bota hoş geldiniz!",
+    "success": "✅ İşlem başarılı!",
+    "error": "❌ Bir hata oluştu!",
+    "loading": "⏳ Yükleniyor...",
+    "notFound": "❌ Bulunamadı!"
+  },
+  "errors": {
+    "noPermission": "❌ Bu komutu kullanmak için yetkiniz yok!",
+    "userNotFound": "❌ Kullanıcı bulunamadı!",
+    "roleNotFound": "❌ Rol bulunamadı!",
+    "commandError": "❌ Bu komutu çalıştırırken bir hata oluştu!",
+    "invalidArgument": "❌ Geçersiz argüman: {arg}"
+  },
+  "commands": {
+    "ping": {
+      "description": "Bot gecikmesi",
+      "response": "🏓 Pong! {latency}ms"
+    },
+    "help": {
+      "description": "Yardım menüsünü göster",
+      "title": "📚 Yardım Menüsü",
+      "general": "🏠 Genel",
+      "moderation": "⚙️ Moderasyon",
+      "commands": "Mevcut komutlar:"
+    },
+    "language": {
+      "description": "Bot dilini değiştir",
+      "title": "Dil Seçin",
+      "current": "Mevcut dil",
+      "success": "✅ Dil {language} olarak ayarlandı"
+    },
+    "ban": {
+      "description": "Bir kullanıcıyı yasakla",
+      "success": "✅ **{user}** yasaklandı.",
+      "reason": "📝 Sebep: {reason}",
+      "error": "❌ Kullanıcı yasaklanırken hata: {error}"
+    },
+    "kick": {
+      "description": "Bir kullanıcıyı sunucudan çıkar",
+      "success": "✅ **{user}** sunucudan çıkarıldı.",
+      "reason": "📝 Sebep: {reason}",
+      "error": "❌ Kullanıcı çıkarılırken hata: {error}"
+    },
+    "mute": {
+      "description": "Bir kullanıcıyı sustur",
+      "success": "🔇 **{user}** **{duration}** dakika susturuldu.",
+      "reason": "📝 Sebep: {reason}",
+      "error": "❌ Kullanıcı susturulurken hata: {error}"
+    },
+    "role": {
+      "description": "Kullanıcıya rol ver veya kaldır",
+      "given": "✅ **{role}** rolü **{user}** kullanıcısına verildi",
+      "removed": "✅ **{role}** rolü **{user}** kullanıcısından kaldırıldı",
+      "error": "❌ Rol yönetilirken hata: {error}"
+    }
+  }
+}

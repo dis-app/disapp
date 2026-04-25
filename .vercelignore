@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+dist
+coverage
+.env
+.env.local
+.env*.local
+*.log
+.DS_Store
+.vercel
+examples
+packages/*/node_modules
+packages/*/dist
+apps/*/node_modules
+apps/*/.next

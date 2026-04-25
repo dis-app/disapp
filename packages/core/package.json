@@ -1,0 +1,40 @@
+{
+  "name": "@disapp/core",
+  "version": "1.0.0",
+  "description": "Disapp core framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui",
+    "db:push": "drizzle-kit push:pg",
+    "db:studio": "drizzle-kit studio",
+    "db:migrate": "tsx scripts/migrate.ts"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "discord-api-types": "^0.37.83",
+    "dotenv": "^16.4.1",
+    "winston": "^3.11.0",
+    "drizzle-orm": "^0.30.10",
+    "pg": "^8.11.3",
+    "postgres": "^3.4.4"
+  },
+  "devDependencies": {
+    "@disapp/config": "workspace:*",
+    "@types/node": "^20.11.0",
+    "@types/pg": "^8.11.6",
+    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/ui": "^1.6.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.6.0",
+    "drizzle-kit": "^0.20.14",
+    "tsx": "^4.19.2"
+  }
+}

@@ -1,0 +1,98 @@
+<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Environment Setup</p>
+# Installation and Integration
+
+Setting up Disapp and connecting it to the Discord.js infrastructure is incredibly straightforward. You can bootstrap an entire project from scratch in minutes, or seamlessly integrate Disapp into your existing, bulky bot ecosystem.
+
+Follow the steps below to initialize your first Disapp bot.
+
+<br />
+
+## Initial Setup (CLI)
+
+The easiest method is using the automatic project generator. This tool scaffolds a flawless folder structure for you, complete with TypeScript, Eslint, Prettier, environment variables, and boilerplate command classes.
+
+<Steps>
+  <Step title="Open Your Terminal" stepNumber="1">
+    Navigate to the directory where you want your project to reside.
+  </Step>
+
+  <Step title="Run the Create Disapp Wizard" stepNumber="2">
+    Execute the following command to access the setup wizard:
+    
+    ```bash
+    npx create-disapp
+    # or
+    pnpm create disapp
+    ```
+  </Step>
+  
+  <Step title="Configure Your Settings" stepNumber="3">
+    The terminal will prompt you for your bot's name, preferred database layer (PostgreSQL, MySQL, or SQLite), and TypeScript configurations. Fill these out according to your needs.
+  </Step>
+</Steps>
+
+<Callout type="success" title="Automatic Scaffolding">
+This scaffolded output automatically integrates the `DisappClient`, the command synchronization engine, `HotReload` mechanics, and the `DynamicConfig` architecture right out of the box.
+</Callout>
+
+<br />
+
+## Integrating into an Existing Project
+
+If you already have a functioning Discord.js bot and simply want to add Disapp module enhancements without discarding your project, you can install the core library via npm.
+
+```bash
+pnpm install discord.js @disapp/core
+```
+
+<Callout type="warning" title="IMPORTANT NOTICE">
+If you plan to utilize our DrizzleORM models or the i18n Multi-Language modules, keep in mind that those are peer-dependencies. Components like `LeaderboardBuilder` won't function natively without database access.
+</Callout>
+
+<br />
+
+## Client Bootstrapping and Initialization
+
+Below is a standard `index.ts` startup execution. The `DisappClient` instance is designed to be fully managed by `DynamicConfig`.
+
+```typescript
+import { DisappClient, DynamicConfig } from '@disapp/core';
+import { GatewayIntentBits } from 'discord.js';
+
+// Securing the relative execution paths.
+import path from 'path';
+
+// Initialize the core configuration class
+const config = new DynamicConfig({
+  token: process.env.DISCORD_TOKEN,
+  clientId: process.env.CLIENT_ID,
+  commandsPath: path.join(__dirname, 'commands'),
+  eventsPath: path.join(__dirname, 'events'),
+});
+
+const client = new DisappClient({
+  config: config.get(),
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates // Required if utilizing the VoiceTracker module.
+  ],
+});
+
+// Boot the client and connect to the Discord API
+client.start().then(() => {
+  console.log("Disapp has successfully connected to Discord!");
+});
+```
+
+<br />
+
+<AccordionGroup>
+  <Accordion title="Security (Tokens & Client IDs)">
+    When uploading your project to open-source platforms like GitHub, your tokens must strictly reside within the `.env` file. Disapp intelligently scans environment variables during initialization.
+  </Accordion>
+  <Accordion title="Database (Initial Sync)">
+    If you invoke the `initializeDatabase()` method prior to `client.start()`, critical database tables (such as UserStats and Guild data) will immediately be synchronized and prepared.
+  </Accordion>
+</AccordionGroup>

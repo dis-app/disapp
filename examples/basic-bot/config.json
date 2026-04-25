@@ -1,0 +1,15 @@
+{
+  "prefix": "!",
+  "color": 5793266,
+  "maintenanceMode": false,
+  "features": {
+    "commands": true,
+    "events": true,
+    "database": true
+  },
+  "limits": {
+    "commandCooldown": 3000,
+    "maxMessageLength": 2000
+  },
+  "customData": {}
+}

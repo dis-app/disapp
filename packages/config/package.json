@@ -1,0 +1,11 @@
+{
+  "name": "@disapp/config",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "files": ["*.json", "*.js"],
+  "dependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
