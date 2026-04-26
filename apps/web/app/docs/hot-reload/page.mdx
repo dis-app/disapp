@@ -1,52 +1,148 @@
-<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Developer Productivity</p>
 # Hot Reload Architecture
 
-Restarting the Discord instance frequently when tweaking parameters forces prolonged development friction and annoying Discord API delays (Rate limiting risks over login hooks). Thanks entirely to our embedded **HotReload** infrastructure, when you save a file (CTRL + S), the core engine strictly reinjects the file without breaking connections.
-
-<br />
+Restarting the Discord instance frequently when tweaking parameters forces prolonged development friction and annoying Discord API delays. Thanks entirely to our embedded **HotReload** infrastructure, when you save a file (CTRL + S), the core engine strictly reinjects the file without breaking connections.
 
 ## Invoking HotReload Streams
 
 The instances running inside `DisappClient` do not configure the listeners automatically to prevent production breaches. However, mapping development nodes manually is seamless.
 
 ```typescript
-import { DisappClient, HotReload } from '@disapp/core';
+import { DisappClient, HotReload } from "@disapp/core";
 
 async function start() {
-    const client = new DisappClient({ /* ... parameters */ });
-    
-    // Process HotReload dependencies securely within development contexts exclusively
-    if (process.env.NODE_ENV === 'development') {
-        const hotReload = new HotReload(client);
-        
-        hotReload.watchCommands();
-        hotReload.watchEvents();
-        
-        client.logger.info("🔥 HotReload engine is operational!");
-    }
+  const client = new DisappClient({
+    /* ... parameters */
+  });
 
-    await client.start();
+  if (process.env.NODE_ENV === "development") {
+    const hotReload = new HotReload(client);
+
+    hotReload.watchCommands();
+    hotReload.watchEvents();
+
+    client.logger.info("🔥 HotReload engine is operational!");
+  }
+
+  await client.start();
 }
 ```
 
-<br />
-
 ## What Processes Are Tracked?
 
-<CardGroup>
-  <Card title="Commands Core" icon="terminal">
-    Modifying any file nested inside `commands/` invokes a deep reload utilizing the `CommandRegistry`. Disapp dynamically purges cached references and syncs directly **bypassing complete resets.**
-  </Card>
-  <Card title="Event Dispatchers" icon="zap">
-    Altered logic structures resting beneath `events/` sever the pre-existing event linkage mapped across `client.on` while routing incoming actions to the newer deployment seamlessly.
-  </Card>
-  <Card title="Localization Output (i18n)" icon="globe">
-    JSON parameters saved beneath `locales/` instantly reroute against existing mappings, forcing `I18n` logic algorithms to recompile memory mappings. (Utilizing Alpha implementation cycles)
-  </Card>
-</CardGroup>
+### Commands Core
 
-<br />
+Modifying any file nested inside `commands/` invokes a deep reload utilizing the `CommandRegistry`. Disapp dynamically purges cached references and syncs directly **bypassing complete resets.**
 
-<Callout type="warning" title="Production Targets">
+### Event Dispatchers
+
+Altered logic structures resting beneath `events/` sever the pre-existing event linkage mapped across `client.on` while routing incoming actions to the newer deployment seamlessly.
+
+### Localization Output (i18n)
+
+JSON parameters saved beneath `locales/` instantly reroute against existing mappings, forcing `I18n` logic algorithms to recompile memory mappings.
+
+## How It Works
+
+1. **File Watcher** - Monitors file changes in real-time
+2. **Cache Invalidation** - Clears Node.js require cache
+3. **Module Reload** - Reloads the modified module
+4. **Registry Update** - Updates command/event registry
+5. **Discord Sync** - Syncs changes with Discord API
+
+## Example Workflow
+
+1. Edit `commands/ping.ts`
+2. Save the file (CTRL + S)
+3. HotReload detects the change
+4. Command is reloaded automatically
+5. Discord API is updated
+6. No bot restart needed!
+
+```
+[INFO] File changed: ping.ts
+[INFO] Command reloaded: ping
+[INFO] Syncing 7 guild commands...
+[INFO] 7 guild commands synced successfully
+[INFO] Hot reload completed in 234ms
+```
+
+## Configuration
+
+### Enable in Development Only
+
+```typescript
+if (process.env.NODE_ENV === "development") {
+  const hotReload = new HotReload(client);
+  hotReload.watchCommands();
+  hotReload.watchEvents();
+}
+```
+
+### Watch Specific Directories
+
+```typescript
+const hotReload = new HotReload(client);
+
+hotReload.watchCommands();
+hotReload.watchEvents();
+```
+
+## Benefits
+
+- **No Restart Required** - Changes apply instantly
+- **Faster Development** - Save time during development
+- **Preserve State** - Bot stays connected to Discord
+- **Automatic Sync** - Commands sync automatically
+- **Error Recovery** - Graceful error handling
+
+## Production Warning
+
 Do ensure deployments against active server nodes (VPS, Hosting deployments) trigger under production modes correctly. `HotReload` minimizes development scope but produces intensive system overhead likely provoking massive Memory Leaks globally.
-</Callout>
+
+**Never enable HotReload in production!**
+
+```typescript
+if (process.env.NODE_ENV !== "production") {
+  const hotReload = new HotReload(client);
+  hotReload.watchCommands();
+  hotReload.watchEvents();
+}
+```
+
+## Limitations
+
+- **Production Use** - Not recommended for production
+- **Memory Usage** - Can increase memory usage
+- **File System** - Requires file system access
+- **Docker** - May not work in some Docker configurations
+
+## Troubleshooting
+
+### Hot Reload Not Working
+
+1. Check if `NODE_ENV` is set to `development`
+2. Verify file paths are correct
+3. Check file permissions
+4. Restart the bot
+
+### Commands Not Syncing
+
+1. Check Discord API rate limits
+2. Verify bot token is valid
+3. Check command data is valid
+4. Review console logs for errors
+
+## Best Practices
+
+- **Development Only** - Only use in development
+- **Watch Specific Directories** - Don't watch unnecessary files
+- **Monitor Memory** - Keep an eye on memory usage
+- **Test Changes** - Always test after hot reload
+- **Use Version Control** - Commit before major changes
+
+## Learn More
+
+- [Getting Started](/docs/getting-started) - Setup guide
+- [Commands](/docs/commands) - Command system
+- [Events](/docs/events) - Event system
+- [Examples](/docs/examples) - Usage examples

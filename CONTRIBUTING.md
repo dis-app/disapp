@@ -68,7 +68,6 @@ pnpm --filter @disapp/core test
 
 - Use TypeScript
 - Follow ESLint rules
-- No comments in code (see nocomment.md)
 - Use meaningful variable names
 - Run lint before committing
 

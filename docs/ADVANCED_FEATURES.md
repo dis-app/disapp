@@ -7,6 +7,7 @@ Disapp framework includes powerful advanced features that dramatically reduce bo
 Automatically manage button clicks and select menu interactions without manual collector setup.
 
 ### Before (Manual Collectors)
+
 ```typescript
 // 50+ lines of collector setup
 const collector = interaction.channel.createMessageComponentCollector({
@@ -14,36 +15,37 @@ const collector = interaction.channel.createMessageComponentCollector({
   time: 300000,
 });
 
-collector.on('collect', async (i) => {
-  if (i.customId === 'button1') {
+collector.on("collect", async (i) => {
+  if (i.customId === "button1") {
     // Handle button1
-  } else if (i.customId === 'button2') {
+  } else if (i.customId === "button2") {
     // Handle button2
   }
 });
 ```
 
 ### After (Smart Handlers)
+
 ```typescript
 const message = v2()
-  .text('# Menu')
+  .text("# Menu")
   .buttons(
-    { 
-      id: 'button1', 
-      label: 'Option 1', 
+    {
+      id: "button1",
+      label: "Option 1",
       style: ButtonStyle.Primary,
       onClick: async (i) => {
-        await i.reply('You clicked Option 1!');
-      }
+        await i.reply("You clicked Option 1!");
+      },
     },
-    { 
-      id: 'button2', 
-      label: 'Option 2', 
+    {
+      id: "button2",
+      label: "Option 2",
       style: ButtonStyle.Success,
       onClick: async (i) => {
-        await i.reply('You clicked Option 2!');
-      }
-    }
+        await i.reply("You clicked Option 2!");
+      },
+    },
   )
   .build();
 
@@ -57,25 +59,27 @@ if (message.handlers) {
 ```
 
 ### Select Menus with Handlers
+
 ```typescript
 const message = v2()
-  .text('# Choose an option')
+  .text("# Choose an option")
   .select(
-    'my_select',
-    'Select something',
+    "my_select",
+    "Select something",
     [
-      { label: 'Option A', value: 'a' },
-      { label: 'Option B', value: 'b' },
+      { label: "Option A", value: "a" },
+      { label: "Option B", value: "b" },
     ],
     async (i) => {
       const selected = i.values[0];
       await i.reply(`You selected: ${selected}`);
-    }
+    },
   )
   .build();
 ```
 
 ### Benefits
+
 - ✅ **90% less code** - No manual collector setup
 - ✅ **Memory safe** - Auto cleanup after timeout
 - ✅ **Type safe** - Full TypeScript support
@@ -88,14 +92,16 @@ const message = v2()
 Automatically split long messages that exceed Discord's 2000 character limit.
 
 ### Basic Usage
+
 ```typescript
 const message = v2()
   .enableAutoChunking()
-  .text('Very long text that exceeds 2000 characters...')
+  .text("Very long text that exceeds 2000 characters...")
   .build();
 ```
 
 ### With Code Block Preservation
+
 ```typescript
 const message = v2()
   .enableAutoChunking({
@@ -103,7 +109,8 @@ const message = v2()
     preserveCodeBlocks: true,
     preserveMarkdown: true,
   })
-  .text(`
+  .text(
+    `
 # Documentation
 
 \`\`\`typescript
@@ -114,15 +121,17 @@ function example() {
 \`\`\`
 
 More content here...
-  `)
+  `,
+  )
   .build();
 ```
 
 ### Manual Chunking
-```typescript
-import { AutoChunker } from '@disapp/core';
 
-const longText = '...'; // 5000 characters
+```typescript
+import { AutoChunker } from "@disapp/core";
+
+const longText = "..."; // 5000 characters
 const chunks = AutoChunker.autoChunk(longText, {
   maxLength: 2000,
   preserveCodeBlocks: true,
@@ -134,16 +143,18 @@ for (const chunk of chunks) {
 ```
 
 ### Options
+
 ```typescript
 interface AutoChunkerOptions {
-  maxLength?: number;           // Default: 2000
+  maxLength?: number; // Default: 2000
   preserveCodeBlocks?: boolean; // Default: true
-  preserveMarkdown?: boolean;   // Default: true
-  separator?: string;           // Default: '\n'
+  preserveMarkdown?: boolean; // Default: true
+  separator?: string; // Default: '\n'
 }
 ```
 
 ### Benefits
+
 - ✅ **Automatic** - No manual splitting needed
 - ✅ **Smart** - Preserves code blocks and markdown
 - ✅ **Configurable** - Customize behavior
@@ -158,17 +169,18 @@ Add reusable logic to commands with middleware functions.
 ### Built-in Middleware
 
 #### Admin Only
+
 ```typescript
-import { Command, OnlyAdmin } from '@disapp/core';
+import { Command, OnlyAdmin } from "@disapp/core";
 
 export default class BanCommand extends Command {
   constructor() {
     super({
-      name: 'ban',
-      description: 'Ban a user',
+      name: "ban",
+      description: "Ban a user",
       data: new SlashCommandBuilder()
-        .setName('ban')
-        .setDescription('Ban a user'),
+        .setName("ban")
+        .setDescription("Ban a user"),
       middlewares: [OnlyAdmin()],
       execute: async () => {},
     });
@@ -176,24 +188,25 @@ export default class BanCommand extends Command {
 
   async execute(interaction: any) {
     // Only admins can reach here
-    await interaction.reply('User banned!');
+    await interaction.reply("User banned!");
   }
 }
 ```
 
 #### Cooldown
+
 ```typescript
-import { Cooldown } from '@disapp/core';
+import { Cooldown } from "@disapp/core";
 
 export default class DailyCommand extends Command {
   constructor() {
     super({
-      name: 'daily',
-      description: 'Claim daily reward',
+      name: "daily",
+      description: "Claim daily reward",
       data: new SlashCommandBuilder()
-        .setName('daily')
-        .setDescription('Claim daily reward'),
-      middlewares: [Cooldown(86400000)], // 24 hours
+        .setName("daily")
+        .setDescription("Claim daily reward"),
+      middlewares: [Cooldown(86400000)], // 24 hours in milliseconds
       execute: async () => {},
     });
   }
@@ -201,18 +214,19 @@ export default class DailyCommand extends Command {
 ```
 
 #### Require Permission
+
 ```typescript
-import { RequirePermission } from '@disapp/core';
-import { PermissionFlagsBits } from 'discord.js';
+import { RequirePermission } from "@disapp/core";
+import { PermissionFlagsBits } from "discord.js";
 
 export default class KickCommand extends Command {
   constructor() {
     super({
-      name: 'kick',
-      description: 'Kick a user',
+      name: "kick",
+      description: "Kick a user",
       data: new SlashCommandBuilder()
-        .setName('kick')
-        .setDescription('Kick a user'),
+        .setName("kick")
+        .setDescription("Kick a user"),
       middlewares: [RequirePermission(PermissionFlagsBits.KickMembers)],
       execute: async () => {},
     });
@@ -221,17 +235,18 @@ export default class KickCommand extends Command {
 ```
 
 #### Require Database
+
 ```typescript
-import { RequireDatabase } from '@disapp/core';
+import { RequireDatabase } from "@disapp/core";
 
 export default class StatsCommand extends Command {
   constructor() {
     super({
-      name: 'stats',
-      description: 'View stats',
+      name: "stats",
+      description: "View stats",
       data: new SlashCommandBuilder()
-        .setName('stats')
-        .setDescription('View stats'),
+        .setName("stats")
+        .setDescription("View stats"),
       middlewares: [RequireDatabase()],
       execute: async () => {},
     });
@@ -241,25 +256,26 @@ export default class StatsCommand extends Command {
 
 ### Available Middleware
 
-| Middleware | Description | Usage |
-|------------|-------------|-------|
-| `OnlyAdmin()` | Requires Administrator permission | `middlewares: [OnlyAdmin()]` |
-| `RequirePermission(perm)` | Requires specific permission | `middlewares: [RequirePermission(PermissionFlagsBits.ManageMessages)]` |
-| `Cooldown(ms)` | Adds cooldown per user | `middlewares: [Cooldown(5000)]` |
-| `RateLimit(max, window)` | Limits uses per time window | `middlewares: [RateLimit(3, 60000)]` |
-| `RequireDatabase()` | Requires database connection | `middlewares: [RequireDatabase()]` |
-| `RequireGuild()` | Requires command in server | `middlewares: [RequireGuild()]` |
-| `RequireRole(roleId)` | Requires specific role | `middlewares: [RequireRole('123456789')]` |
-| `OwnerOnly(ownerId)` | Only bot owner can use | `middlewares: [OwnerOnly('123456789')]` |
+| Middleware                | Description                       | Usage                                                                  |
+| ------------------------- | --------------------------------- | ---------------------------------------------------------------------- |
+| `OnlyAdmin()`             | Requires Administrator permission | `middlewares: [OnlyAdmin()]`                                           |
+| `RequirePermission(perm)` | Requires specific permission      | `middlewares: [RequirePermission(PermissionFlagsBits.ManageMessages)]` |
+| `Cooldown(ms)`            | Adds cooldown per user            | `middlewares: [Cooldown(5000)]`                                        |
+| `RateLimit(max, window)`  | Limits uses per time window       | `middlewares: [RateLimit(3, 60000)]`                                   |
+| `RequireDatabase()`       | Requires database connection      | `middlewares: [RequireDatabase()]`                                     |
+| `RequireGuild()`          | Requires command in server        | `middlewares: [RequireGuild()]`                                        |
+| `RequireRole(roleId)`     | Requires specific role            | `middlewares: [RequireRole('123456789')]`                              |
+| `OwnerOnly(ownerId)`      | Only bot owner can use            | `middlewares: [OwnerOnly('123456789')]`                                |
 
 ### Custom Middleware
+
 ```typescript
-import { MiddlewareFunction } from '@disapp/core';
+import { MiddlewareFunction } from "@disapp/core";
 
 function RequireLevel(minLevel: number): MiddlewareFunction {
   return async (ctx) => {
     const userLevel = await getUserLevel(ctx.interaction.user.id);
-    
+
     if (userLevel < minLevel) {
       await ctx.interaction.reply({
         content: `❌ You need level ${minLevel} to use this command!`,
@@ -267,7 +283,7 @@ function RequireLevel(minLevel: number): MiddlewareFunction {
       });
       return false;
     }
-    
+
     return true;
   };
 }
@@ -276,11 +292,11 @@ function RequireLevel(minLevel: number): MiddlewareFunction {
 export default class AdvancedCommand extends Command {
   constructor() {
     super({
-      name: 'advanced',
-      description: 'Advanced command',
+      name: "advanced",
+      description: "Advanced command",
       data: new SlashCommandBuilder()
-        .setName('advanced')
-        .setDescription('Advanced command'),
+        .setName("advanced")
+        .setDescription("Advanced command"),
       middlewares: [RequireLevel(10)],
       execute: async () => {},
     });
@@ -289,15 +305,16 @@ export default class AdvancedCommand extends Command {
 ```
 
 ### Chaining Middleware
+
 ```typescript
 export default class SecureCommand extends Command {
   constructor() {
     super({
-      name: 'secure',
-      description: 'Secure command',
+      name: "secure",
+      description: "Secure command",
       data: new SlashCommandBuilder()
-        .setName('secure')
-        .setDescription('Secure command'),
+        .setName("secure")
+        .setDescription("Secure command"),
       middlewares: [
         RequireGuild(),
         OnlyAdmin(),
@@ -311,6 +328,7 @@ export default class SecureCommand extends Command {
 ```
 
 ### Benefits
+
 - ✅ **Reusable** - Write once, use everywhere
 - ✅ **Clean** - No if statements in commands
 - ✅ **Composable** - Chain multiple middleware
@@ -323,21 +341,21 @@ export default class SecureCommand extends Command {
 Hot-reload bot configuration without restarting.
 
 ### Setup
+
 ```typescript
-import { DynamicConfig } from '@disapp/core';
+import { DynamicConfig } from "@disapp/core";
 
-const config = DynamicConfig.getInstance('./config.json');
-
-// Start watching for changes
-config.startWatching();
+// Get or create instance with config path
+const config = DynamicConfig.getInstance("./config.json");
 
 // Listen for changes
-config.on('changed', (newConfig, oldConfig) => {
-  console.log('Config updated!', newConfig);
+config.on("changed", (newConfig, oldConfig) => {
+  console.log("Config updated!", newConfig);
 });
 ```
 
 ### Default Config Structure
+
 ```json
 {
   "prefix": "!",
@@ -357,39 +375,41 @@ config.on('changed', (newConfig, oldConfig) => {
 ```
 
 ### Usage in Commands
+
 ```typescript
-import { DynamicConfig } from '@disapp/core';
+import { DynamicConfig } from "@disapp/core";
 
 export default class ConfigCommand extends Command {
   async execute(interaction: any) {
     const config = DynamicConfig.getInstance();
-    
+
     // Check maintenance mode
     if (config.isMaintenanceMode()) {
-      await interaction.reply('🔧 Bot is in maintenance mode!');
+      await interaction.reply("🔧 Bot is in maintenance mode!");
       return;
     }
-    
+
     // Get color
-    const color = config.get('color');
-    
+    const color = config.get("color");
+
     // Check feature
-    if (!config.isFeatureEnabled('commands')) {
-      await interaction.reply('❌ Commands are disabled!');
+    if (!config.isFeatureEnabled("commands")) {
+      await interaction.reply("❌ Commands are disabled!");
       return;
     }
-    
-    await interaction.reply('✅ Command executed!');
+
+    await interaction.reply("✅ Command executed!");
   }
 }
 ```
 
 ### Update Config Programmatically
+
 ```typescript
 const config = DynamicConfig.getInstance();
 
 // Update single value
-config.set('maintenanceMode', true);
+config.set("maintenanceMode", true);
 
 // Update multiple values
 config.update({
@@ -398,11 +418,12 @@ config.update({
 });
 
 // Custom data
-config.setCustom('welcomeMessage', 'Hello!');
-const message = config.getCustom('welcomeMessage');
+config.setCustom("welcomeMessage", "Hello!");
+const message = config.getCustom("welcomeMessage");
 ```
 
 ### Live Reload Example
+
 ```typescript
 // Edit config.json while bot is running
 {
@@ -413,25 +434,27 @@ const message = config.getCustom('welcomeMessage');
 ```
 
 ### Events
+
 ```typescript
-config.on('loaded', (config) => {
-  console.log('Config loaded:', config);
+config.on("loaded", (config) => {
+  console.log("Config loaded:", config);
 });
 
-config.on('changed', (newConfig, oldConfig) => {
-  console.log('Config changed:', newConfig);
+config.on("changed", (newConfig, oldConfig) => {
+  console.log("Config changed:", newConfig);
 });
 
-config.on('updated', (key, value) => {
+config.on("updated", (key, value) => {
   console.log(`${key} updated to:`, value);
 });
 
-config.on('reset', (config) => {
-  console.log('Config reset to defaults');
+config.on("reset", (config) => {
+  console.log("Config reset to defaults");
 });
 ```
 
 ### Benefits
+
 - ✅ **Hot Reload** - No bot restart needed
 - ✅ **Type-safe** - Full TypeScript support
 - ✅ **Event-driven** - React to changes
@@ -444,35 +467,32 @@ config.on('reset', (config) => {
 Combining all features:
 
 ```typescript
-import { 
-  Command, 
-  v2, 
-  OnlyAdmin, 
-  Cooldown, 
+import {
+  Command,
+  v2,
+  OnlyAdmin,
+  Cooldown,
   InteractionHandler,
-  DynamicConfig 
-} from '@disapp/core';
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+  DynamicConfig,
+} from "@disapp/core";
+import { SlashCommandBuilder, ButtonStyle } from "discord.js";
 
 export default class AdvancedCommand extends Command {
   constructor() {
     super({
-      name: 'advanced',
-      description: 'Advanced command with all features',
+      name: "advanced",
+      description: "Advanced command with all features",
       data: new SlashCommandBuilder()
-        .setName('advanced')
-        .setDescription('Advanced command with all features'),
-      middlewares: [
-        OnlyAdmin(),
-        Cooldown(5000),
-      ],
+        .setName("advanced")
+        .setDescription("Advanced command with all features"),
+      middlewares: [OnlyAdmin(), Cooldown(5000)],
       execute: async () => {},
     });
   }
 
   async execute(interaction: any) {
     const config = DynamicConfig.getInstance();
-    const color = config.get('color') || 0x5865f2;
+    const color = config.get("color") || 0x5865f2;
 
     const longText = `
 # Advanced Features Demo
@@ -483,7 +503,7 @@ This message demonstrates:
 - Dynamic configuration
 - Middleware protection
 
-${'Lorem ipsum '.repeat(200)}
+${"Lorem ipsum ".repeat(200)}
     `.trim();
 
     const message = v2()
@@ -493,21 +513,21 @@ ${'Lorem ipsum '.repeat(200)}
       .separator()
       .buttons(
         {
-          id: 'refresh',
-          label: 'Refresh',
+          id: "refresh",
+          label: "Refresh",
           style: ButtonStyle.Primary,
-          emoji: '🔄',
+          emoji: "🔄",
           onClick: async (i) => {
             await i.update({
-              content: 'Refreshed at ' + new Date().toLocaleTimeString(),
+              content: "Refreshed at " + new Date().toLocaleTimeString(),
             });
           },
         },
         {
-          id: 'config',
-          label: 'Show Config',
+          id: "config",
+          label: "Show Config",
           style: ButtonStyle.Secondary,
-          emoji: '⚙️',
+          emoji: "⚙️",
           onClick: async (i) => {
             const cfg = config.getAll();
             await i.reply({
@@ -515,30 +535,34 @@ ${'Lorem ipsum '.repeat(200)}
               flags: 64,
             });
           },
-        }
+        },
       )
       .select(
-        'action',
-        'Choose an action',
+        "action",
+        "Choose an action",
         [
-          { label: 'Enable Maintenance', value: 'maintenance_on', emoji: '🔧' },
-          { label: 'Disable Maintenance', value: 'maintenance_off', emoji: '✅' },
-          { label: 'Reset Config', value: 'reset', emoji: '🔄' },
+          { label: "Enable Maintenance", value: "maintenance_on", emoji: "🔧" },
+          {
+            label: "Disable Maintenance",
+            value: "maintenance_off",
+            emoji: "✅",
+          },
+          { label: "Reset Config", value: "reset", emoji: "🔄" },
         ],
         async (i) => {
           const action = i.values[0];
-          
-          if (action === 'maintenance_on') {
-            config.set('maintenanceMode', true);
-            await i.reply('🔧 Maintenance mode enabled!');
-          } else if (action === 'maintenance_off') {
-            config.set('maintenanceMode', false);
-            await i.reply('✅ Maintenance mode disabled!');
-          } else if (action === 'reset') {
+
+          if (action === "maintenance_on") {
+            config.set("maintenanceMode", true);
+            await i.reply("🔧 Maintenance mode enabled!");
+          } else if (action === "maintenance_off") {
+            config.set("maintenanceMode", false);
+            await i.reply("✅ Maintenance mode disabled!");
+          } else if (action === "reset") {
             config.reset();
-            await i.reply('🔄 Config reset to defaults!');
+            await i.reply("🔄 Config reset to defaults!");
           }
-        }
+        },
       )
       .build();
 
@@ -571,6 +595,7 @@ All features are optimized for performance:
 ## Migration Guide
 
 ### From Manual Collectors
+
 ```typescript
 // Before
 const collector = channel.createMessageComponentCollector(...);
@@ -582,6 +607,7 @@ InteractionHandler.register(...);
 ```
 
 ### From Manual Chunking
+
 ```typescript
 // Before
 if (text.length > 2000) {
@@ -596,14 +622,15 @@ v2().enableAutoChunking().text(text).build();
 ```
 
 ### From Manual Permission Checks
+
 ```typescript
 // Before
-if (!interaction.member.permissions.has('ADMINISTRATOR')) {
-  return interaction.reply('No permission!');
+if (!interaction.member.permissions.has("ADMINISTRATOR")) {
+  return interaction.reply("No permission!");
 }
 
 // After
-middlewares: [OnlyAdmin()]
+middlewares: [OnlyAdmin()];
 ```
 
 ## License
@@ -628,6 +655,7 @@ locales/
 ```
 
 **locales/en.json**
+
 ```json
 {
   "commands": {
@@ -639,6 +667,7 @@ locales/
 ```
 
 **locales/tr.json**
+
 ```json
 {
   "commands": {
@@ -652,29 +681,29 @@ locales/
 ### Initialize
 
 ```typescript
-import { i18n } from '@disapp/core';
-import path from 'path';
+import { i18n } from "@disapp/core";
+import path from "path";
 
 const i18nInstance = i18n({
-  defaultLanguage: 'en',
-  fallbackLanguage: 'en',
-  localesPath: path.join(__dirname, '../locales'),
+  defaultLanguage: "en",
+  fallbackLanguage: "en",
+  localesPath: path.join(__dirname, "../locales"),
 });
 
-i18nInstance.loadLocales(path.join(__dirname, '../locales'));
+i18nInstance.loadLocales(path.join(__dirname, "../locales"));
 ```
 
 ### Usage in Commands
 
 ```typescript
-import { Command, I18nHelper } from '@disapp/core';
+import { Command, I18nHelper } from "@disapp/core";
 
 export default class PingCommand extends Command {
   async execute(interaction: any) {
-    const lang = interaction.locale?.split('-')[0] || 'en';
+    const lang = interaction.locale?.split("-")[0] || "en";
     const latency = Math.round(interaction.client.ws.ping);
-    
-    const message = I18nHelper.command('ping.response', lang, { latency });
+
+    const message = I18nHelper.command("ping.response", lang, { latency });
     await interaction.reply(message);
   }
 }
@@ -683,33 +712,31 @@ export default class PingCommand extends Command {
 ### Helper Methods
 
 ```typescript
-I18nHelper.t('key', 'en', { param: 'value' });
-I18nHelper.button('confirm', 'en');
-I18nHelper.modal('settings', 'en');
-I18nHelper.message('welcome', 'en');
-I18nHelper.error('noPermission', 'en');
-I18nHelper.command('ping.response', 'en', { latency: 50 });
-I18nHelper.embed('welcome', 'en');
+I18nHelper.t("key", "en", { param: "value" });
+I18nHelper.button("confirm", "en");
+I18nHelper.modal("settings", "en");
+I18nHelper.message("welcome", "en");
+I18nHelper.error("noPermission", "en");
+I18nHelper.command("ping.response", "en", { latency: 50 });
+I18nHelper.embed("welcome", "en");
 ```
 
 ### With Components V2
 
 ```typescript
-const lang = interaction.locale?.split('-')[0] || 'en';
-const t = (key: string, params?: Record<string, any>) => 
+const lang = interaction.locale?.split("-")[0] || "en";
+const t = (key: string, params?: Record<string, any>) =>
   I18nHelper.command(key, lang, params);
 
 const message = v2()
-  .text(t('menu.title'))
-  .buttons(
-    {
-      id: 'confirm',
-      label: I18nHelper.button('confirm', lang),
-      onClick: async (i) => {
-        await i.reply(t('menu.confirmed'));
-      }
-    }
-  )
+  .text(t("menu.title"))
+  .buttons({
+    id: "confirm",
+    label: I18nHelper.button("confirm", lang),
+    onClick: async (i) => {
+      await i.reply(t("menu.confirmed"));
+    },
+  })
   .build();
 ```
 

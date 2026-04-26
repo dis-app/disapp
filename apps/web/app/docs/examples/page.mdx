@@ -1,4 +1,6 @@
-# Disapp Examples
+# Examples
+
+Practical examples to help you get started with Disapp.
 
 ## Simple Bot
 
@@ -63,9 +65,8 @@ export default class AvatarCommand extends Command {
 ## Database Usage
 
 ```typescript
-import { Command } from "@disapp/core";
+import { Command, UserRepository } from "@disapp/core";
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
-import { UserRepository } from "@disapp/core";
 
 export default class ProfileCommand extends Command {
   private userRepo: UserRepository;
@@ -140,7 +141,7 @@ export default class MessageCreateEvent extends Event {
 ## Cooldown System
 
 ```typescript
-import { Command } from "@disapp/core";
+import { Command, Cooldown } from "@disapp/core";
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 
 export default class DailyCommand extends Command {
@@ -152,7 +153,7 @@ export default class DailyCommand extends Command {
         .setName("daily")
         .setDescription("Claim your daily reward"),
       execute: async () => {},
-      cooldown: 86400000,
+      middlewares: [Cooldown(86400000)],
     });
   }
 
@@ -162,54 +163,95 @@ export default class DailyCommand extends Command {
 }
 ```
 
-## Embed Messages
+## Components V2
 
 ```typescript
-import { Command } from "@disapp/core";
-import {
-  SlashCommandBuilder,
-  ChatInputCommandInteraction,
-  EmbedBuilder,
-} from "discord.js";
+import { Command, v2 } from "@disapp/core";
+import { SlashCommandBuilder, ButtonStyle } from "discord.js";
 
-export default class InfoCommand extends Command {
+export default class MenuCommand extends Command {
   constructor() {
     super({
-      name: "info",
-      description: "Bot information",
+      name: "menu",
+      description: "Show menu",
       data: new SlashCommandBuilder()
-        .setName("info")
-        .setDescription("Bot information"),
+        .setName("menu")
+        .setDescription("Show menu"),
       execute: async () => {},
     });
   }
 
-  async execute(interaction: ChatInputCommandInteraction): Promise<void> {
-    const embed = new EmbedBuilder()
-      .setColor(0x5865f2)
-      .setTitle("Bot Information")
-      .setDescription("Developed with Disapp framework")
-      .addFields(
+  async execute(interaction: any): Promise<void> {
+    const message = v2()
+      .text("# Main Menu")
+      .separator()
+      .buttons(
         {
-          name: "Server Count",
-          value: `${interaction.client.guilds.cache.size}`,
-          inline: true,
+          id: "option1",
+          label: "Option 1",
+          style: ButtonStyle.Primary,
+          onClick: async (i) => {
+            await i.reply("You selected Option 1!");
+          },
         },
         {
-          name: "User Count",
-          value: `${interaction.client.users.cache.size}`,
-          inline: true,
-        },
-        {
-          name: "Ping",
-          value: `${interaction.client.ws.ping}ms`,
-          inline: true,
+          id: "option2",
+          label: "Option 2",
+          style: ButtonStyle.Success,
+          onClick: async (i) => {
+            await i.reply("You selected Option 2!");
+          },
         },
       )
-      .setTimestamp()
-      .setFooter({ text: "Disapp Framework" });
+      .accentColor(0x5865f2)
+      .build();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply(message);
   }
 }
 ```
+
+## Internationalization
+
+```typescript
+import { Command, I18nHelper } from "@disapp/core";
+import { SlashCommandBuilder } from "discord.js";
+
+export default class GreetCommand extends Command {
+  constructor() {
+    super({
+      name: "greet",
+      description: "Greet a user",
+      data: new SlashCommandBuilder()
+        .setName("greet")
+        .setDescription("Greet a user")
+        .addUserOption((o) =>
+          o.setName("user").setDescription("User to greet").setRequired(true),
+        ),
+      execute: async () => {},
+    });
+  }
+
+  async execute(interaction: any) {
+    const user = interaction.options.getUser("user");
+    const lang = interaction.locale?.split("-")[0] || "en";
+
+    const greeting = I18nHelper.t("greet.message", lang, {
+      user: user.username,
+    });
+
+    await interaction.reply(greeting);
+  }
+}
+```
+
+## More Examples
+
+Check out the [basic-bot example](https://github.com/dis-app/disapp/tree/main/examples/basic-bot) for a complete working bot with:
+
+- Multiple commands
+- Event handlers
+- Database integration
+- Internationalization
+- Hot reload
+- And more!

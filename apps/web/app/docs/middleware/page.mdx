@@ -1,0 +1,170 @@
+# Command Middleware
+
+Middleware allows you to run code before command execution. Use middleware for permissions, cooldowns, validation, and more.
+
+## Built-in Middleware
+
+```typescript
+import { Command, OnlyAdmin, RequirePermission, Cooldown } from "@disapp/core";
+import { SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
+
+export default class BanCommand extends Command {
+  constructor() {
+    super({
+      name: "ban",
+      description: "Ban a user",
+      data: new SlashCommandBuilder()
+        .setName("ban")
+        .setDescription("Ban a user")
+        .addUserOption((option) =>
+          option
+            .setName("user")
+            .setDescription("User to ban")
+            .setRequired(true),
+        ),
+      execute: async () => {},
+      middlewares: [OnlyAdmin(), Cooldown(5000)],
+    });
+  }
+
+  async execute(interaction: any) {
+    const user = interaction.options.getUser("user");
+    await interaction.reply(`✅ Banned ${user.username}`);
+  }
+}
+```
+
+## Available Middleware
+
+| Middleware                      | Description                             | Example                                             |
+| ------------------------------- | --------------------------------------- | --------------------------------------------------- |
+| `OnlyAdmin()`                   | Requires Administrator permission       | `OnlyAdmin()`                                       |
+| `RequirePermission(permission)` | Requires specific permission            | `RequirePermission(PermissionFlagsBits.BanMembers)` |
+| `Cooldown(ms)`                  | Adds cooldown in milliseconds           | `Cooldown(5000)`                                    |
+| `RequireDatabase()`             | Requires database connection            | `RequireDatabase()`                                 |
+| `RequireGuild()`                | Requires command to be used in a server | `RequireGuild()`                                    |
+| `RequireRole(roleId)`           | Requires specific role                  | `RequireRole('123456789')`                          |
+| `OwnerOnly(ownerId)`            | Only bot owner can use                  | `OwnerOnly('123456789')`                            |
+| `RateLimit(maxUses, windowMs)`  | Rate limiting                           | `RateLimit(3, 60000)`                               |
+
+## Multiple Middleware
+
+Chain multiple middleware:
+
+```typescript
+export default class ModCommand extends Command {
+  constructor() {
+    super({
+      name: "mod",
+      description: "Moderation command",
+      data: new SlashCommandBuilder()
+        .setName("mod")
+        .setDescription("Moderation command"),
+      execute: async () => {},
+      middlewares: [
+        RequireGuild(),
+        RequirePermission(PermissionFlagsBits.ModerateMembers),
+        Cooldown(3000),
+        RequireDatabase(),
+      ],
+    });
+  }
+}
+```
+
+## Custom Middleware
+
+Create your own middleware:
+
+```typescript
+import { MiddlewareFunction } from "@disapp/core";
+
+export function RequireLevel(minLevel: number): MiddlewareFunction {
+  return async (ctx) => {
+    const userLevel = await getUserLevel(ctx.interaction.user.id);
+
+    if (userLevel < minLevel) {
+      await ctx.interaction.reply({
+        content: `❌ You need level ${minLevel} to use this command!`,
+        flags: 64,
+      });
+      return false;
+    }
+
+    return true;
+  };
+}
+
+export default class SpecialCommand extends Command {
+  constructor() {
+    super({
+      name: "special",
+      description: "Special command",
+      data: new SlashCommandBuilder()
+        .setName("special")
+        .setDescription("Special command"),
+      execute: async () => {},
+      middlewares: [RequireLevel(10)],
+    });
+  }
+}
+```
+
+## Middleware Context
+
+Middleware functions receive a context object:
+
+```typescript
+interface MiddlewareContext {
+  interaction: any;
+  command: any;
+  next: () => Promise<void>;
+}
+```
+
+## How Middleware Works
+
+1. Middleware executes in order
+2. If middleware returns `false`, execution stops
+3. If middleware returns `true` or calls `next()`, execution continues
+4. If all middleware passes, the command executes
+
+## Best Practices
+
+- **Use middleware for common checks** - Don't repeat yourself
+- **Order matters** - Place fast checks first (e.g., RequireGuild before database checks)
+- **Return false to stop** - Always return false when blocking execution
+- **Provide feedback** - Reply to the user explaining why the command was blocked
+
+## Examples
+
+### Admin-Only Command
+
+```typescript
+middlewares: [OnlyAdmin()];
+```
+
+### Cooldown Command
+
+```typescript
+middlewares: [Cooldown(60000)]; // 1 minute cooldown
+```
+
+### Permission-Based Command
+
+```typescript
+middlewares: [
+  RequireGuild(),
+  RequirePermission(PermissionFlagsBits.ManageMessages),
+];
+```
+
+### Database-Dependent Command
+
+```typescript
+middlewares: [RequireDatabase(), Cooldown(5000)];
+```
+
+## Error Handling
+
+Middleware automatically handles errors and sends appropriate responses to users. You don't need to add try-catch blocks in your middleware unless you want custom error handling.

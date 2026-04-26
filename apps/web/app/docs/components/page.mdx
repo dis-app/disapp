@@ -1,0 +1,261 @@
+# Components (V1)
+
+Build interactive Discord messages with buttons, select menus, and embeds using Disapp's fluent API.
+
+## MessageBuilder
+
+The `MessageBuilder` provides a fluent API for constructing Discord messages:
+
+```typescript
+import { msg, embed, ButtonStyle } from "@disapp/core";
+
+const message = msg()
+  .setContent("# Welcome!")
+  .buttons(
+    { label: "Accept", id: "accept", style: ButtonStyle.Success },
+    { label: "Decline", id: "decline", style: ButtonStyle.Danger },
+  )
+  .addEmbed(
+    embed()
+      .setTitle("Terms of Service")
+      .setDescription("Please read and accept our terms")
+      .setColor(0x5865f2),
+  )
+  .build();
+
+await interaction.reply(message);
+```
+
+## Buttons
+
+### Basic Buttons
+
+```typescript
+msg()
+  .buttons(
+    { label: "Button 1", id: "btn1", style: ButtonStyle.Primary },
+    { label: "Button 2", id: "btn2", style: ButtonStyle.Secondary },
+  )
+  .build();
+```
+
+### Button with Emoji
+
+```typescript
+msg()
+  .buttons(
+    { label: "Like", id: "like", style: ButtonStyle.Success, emoji: "👍" },
+    { label: "Dislike", id: "dislike", style: ButtonStyle.Danger, emoji: "👎" },
+  )
+  .build();
+```
+
+### Link Buttons
+
+```typescript
+msg()
+  .buttons({
+    label: "Visit Website",
+    url: "https://example.com",
+    style: ButtonStyle.Link,
+  })
+  .build();
+```
+
+## Select Menus
+
+### String Select
+
+```typescript
+msg()
+  .stringSelect(
+    "role_select",
+    [
+      { label: "Developer", value: "dev", emoji: "💻" },
+      { label: "Designer", value: "design", emoji: "🎨" },
+      { label: "Manager", value: "manager", emoji: "📊" },
+    ],
+    "Choose your role",
+  )
+  .build();
+```
+
+### User Select
+
+```typescript
+msg().userSelect("user_select", "Select a user", [1, 1]).build();
+```
+
+### Role Select
+
+```typescript
+msg().roleSelect("role_select", "Select a role", [1, 3]).build();
+```
+
+### Channel Select
+
+```typescript
+msg().channelSelect("channel_select", "Select a channel", [1, 1]).build();
+```
+
+## Embeds
+
+### Basic Embed
+
+```typescript
+embed()
+  .setTitle("Title")
+  .setDescription("Description")
+  .setColor(0x5865f2)
+  .build();
+```
+
+### Embed with Fields
+
+```typescript
+embed()
+  .setTitle("User Info")
+  .addFields(
+    { name: "Username", value: "John", inline: true },
+    { name: "Level", value: "10", inline: true },
+    { name: "XP", value: "1000", inline: true },
+  )
+  .build();
+```
+
+### Embed Shortcuts
+
+```typescript
+import {
+  successEmbed,
+  errorEmbed,
+  warningEmbed,
+  infoEmbed,
+} from "@disapp/core";
+
+successEmbed("Success!", "Operation completed");
+errorEmbed("Error!", "Something went wrong");
+warningEmbed("Warning!", "Be careful");
+infoEmbed("Info", "Here is some information");
+```
+
+## Shortcuts
+
+### Confirm/Cancel Buttons
+
+```typescript
+import { confirm } from "@disapp/core";
+
+msg()
+  .setContent("Are you sure?")
+  .components([confirm("confirm_id", "cancel_id")])
+  .build();
+```
+
+### Yes/No Buttons
+
+```typescript
+import { yesNo } from "@disapp/core";
+
+msg()
+  .setContent("Do you agree?")
+  .components([yesNo("yes_id", "no_id")])
+  .build();
+```
+
+### Primary/Danger Buttons
+
+```typescript
+import { primary, danger, row } from "@disapp/core";
+
+msg()
+  .components([row(primary("Edit", "edit_id"), danger("Delete", "delete_id"))])
+  .build();
+```
+
+## Complete Example
+
+```typescript
+import { Command, msg, embed, ButtonStyle } from "@disapp/core";
+import { SlashCommandBuilder } from "discord.js";
+
+export default class ProfileCommand extends Command {
+  constructor() {
+    super({
+      name: "profile",
+      description: "View user profile",
+      data: new SlashCommandBuilder()
+        .setName("profile")
+        .setDescription("View user profile")
+        .addUserOption((option) =>
+          option.setName("user").setDescription("User").setRequired(false),
+        ),
+      execute: async () => {},
+    });
+  }
+
+  async execute(interaction: any) {
+    const user = interaction.options.getUser("user") || interaction.user;
+
+    const message = msg()
+      .setContent(`# ${user.username}'s Profile`)
+      .buttons(
+        {
+          label: "View Stats",
+          id: "stats",
+          style: ButtonStyle.Primary,
+          emoji: "📊",
+        },
+        {
+          label: "Edit Profile",
+          id: "edit",
+          style: ButtonStyle.Secondary,
+          emoji: "✏️",
+        },
+      )
+      .addEmbed(
+        embed()
+          .setTitle("Profile Information")
+          .setThumbnail(user.displayAvatarURL())
+          .addFields(
+            { name: "Username", value: user.username, inline: true },
+            { name: "ID", value: user.id, inline: true },
+            {
+              name: "Created",
+              value: `<t:${Math.floor(user.createdTimestamp / 1000)}:R>`,
+              inline: true,
+            },
+          )
+          .setColor(0x5865f2),
+      )
+      .build();
+
+    await interaction.reply(message);
+  }
+}
+```
+
+## Migration to V2
+
+For modern Discord bots, consider using [Components V2](/docs/components-v2) which provides:
+
+- Better layout control
+- Accent colors
+- Automatic interaction handlers
+- Auto-chunking support
+
+```typescript
+import { v2 } from "@disapp/core";
+
+const message = v2()
+  .text("# Welcome")
+  .buttons({
+    id: "btn1",
+    label: "Click me",
+    style: ButtonStyle.Primary,
+    onClick: async (i) => {
+      await i.reply("Clicked!");
+    },
+  })
+  .build();
+```

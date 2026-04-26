@@ -1,69 +1,205 @@
-<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Custom Output Models</p>
 # Leaderboard Visual Builder
 
 Constructing formatting algorithms and rendering Leaderboards represent arguably the most tedious processes in Discord bot configuration. Splitting logic arrays, sanitizing strings, or handling page overflows usually consume excessive development time.
 
 The `packages/core` features a native `LeaderboardBuilder` engine that instantly casts incoming dataset arrays into visually gorgeous layouts in microseconds.
 
-<br />
-
 ## Initializing LeaderboardBuilder
 
 Consider that you've derived an oversized User array featuring Experience levels utilizing our internal `UserStatsRepository`.
 
 ```typescript
-import { LeaderboardBuilder, UserStatsRepository } from '@disapp/core';
+import { LeaderboardBuilder, UserStatsRepository } from "@disapp/core";
 
-// ... execute runtime context
-
-// Yield the top 10 players based exclusively via XP values
 const statsRepo = new UserStatsRepository();
-const top10 = await statsRepo.getTopPlayers(10); 
+const top10 = await statsRepo.getTopPlayers(interaction.guildId, 10);
 
-// Pipeline structure formulating the resulting Embed structure
 const lb = new LeaderboardBuilder(top10)
-    .setTitle("🌟 Top Active Players")
-    // Dynamically format metrics applied next to each individual iteration line
-    .setFormat((player, index) => {
-        const medal = index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🔹';
-        return `${medal} **${index + 1}. <@${player.userId}>** - ${player.xp} XP\n`;
-    })
-    .buildEmbed(); // Assembles immediately into an Embed structure.
+  .setTitle("🌟 Top Active Players")
+  .setFormat((player, index) => {
+    const medal =
+      index === 0 ? "👑" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🔹";
+    return `${medal} **${index + 1}. <@${player.userId}>** - ${player.xp} XP\n`;
+  })
+  .buildEmbed();
 
 await interaction.reply({ embeds: [lb] });
 ```
 
-<br />
+## LeaderboardBuilder Methods
 
-## VoiceLeaderboardBuilder Construct
+### setTitle()
+
+Set the leaderboard title:
+
+```typescript
+.setTitle('🏆 Top Players')
+```
+
+### setFormat()
+
+Define how each entry is formatted:
+
+```typescript
+.setFormat((player, index) => {
+  return `${index + 1}. ${player.username} - ${player.score} points\n`;
+})
+```
+
+### setColor()
+
+Set the embed color:
+
+```typescript
+.setColor(0x5865f2)
+```
+
+### buildEmbed()
+
+Build the final embed:
+
+```typescript
+.buildEmbed()
+```
+
+## VoiceLeaderboardBuilder
 
 Standard iterations usually miss out regarding specialized arrays tracking purely "Voice Channel Interactions". Those usually rely on native tracking components like (`VoiceActivityRepository`).
 
 Leveraging `VoiceLeaderboardBuilder` enables instant formatting strings converting arbitrary milliseconds into readable output frames like "14 Hours 20 Minutes" without logic overhead.
 
-<Steps>
-  <Step title="Extract Local Data" stepNumber="1">
-    ```typescript
-    const voiceRepo = new VoiceActivityRepository();
-    // Resolve recent weekly metrics bound against your Guild
-    const voiceData = await voiceRepo.getWeeklyVoiceStats(interaction.guildId);
-    ```
-  </Step>
+### Usage
 
-  <Step title="Deploy via Engine" stepNumber="2">
-    ```typescript
-    import { VoiceLeaderboardBuilder } from '@disapp/core';
+```typescript
+import { VoiceLeaderboardBuilder, VoiceActivityRepository } from "@disapp/core";
 
-    // Dispatches string translations instantly processing epoch variables
-    const voiceLb = new VoiceLeaderboardBuilder(voiceData)
-      .setTitle("🎙️ Weekly Voice Metrics")
+const voiceRepo = new VoiceActivityRepository();
+const voiceData = await voiceRepo.getWeeklyStats(interaction.guildId);
+
+const voiceLb = new VoiceLeaderboardBuilder(voiceData)
+  .setTitle("🎙️ Weekly Voice Metrics")
+  .buildEmbed();
+
+await interaction.reply({ embeds: [voiceLb] });
+```
+
+## Complete Example
+
+```typescript
+import { Command, LeaderboardBuilder, UserStatsRepository } from "@disapp/core";
+import { SlashCommandBuilder } from "discord.js";
+
+export default class LeaderboardCommand extends Command {
+  constructor() {
+    super({
+      name: "leaderboard",
+      description: "Show server leaderboard",
+      data: new SlashCommandBuilder()
+        .setName("leaderboard")
+        .setDescription("Show server leaderboard")
+        .addIntegerOption((option) =>
+          option
+            .setName("limit")
+            .setDescription("Number of players to show")
+            .setRequired(false)
+            .setMinValue(5)
+            .setMaxValue(25),
+        ),
+      execute: async () => {},
+    });
+  }
+
+  async execute(interaction: any) {
+    const limit = interaction.options.getInteger("limit") || 10;
+    const statsRepo = new UserStatsRepository();
+
+    const topPlayers = await statsRepo.getTopPlayers(
+      BigInt(interaction.guildId),
+      limit,
+    );
+
+    if (topPlayers.length === 0) {
+      await interaction.reply("No players found!");
+      return;
+    }
+
+    const leaderboard = new LeaderboardBuilder(topPlayers)
+      .setTitle(`🏆 Top ${limit} Players`)
+      .setColor(0x5865f2)
+      .setFormat((player, index) => {
+        const medals = ["👑", "🥈", "🥉"];
+        const medal = medals[index] || "🔹";
+        return (
+          `${medal} **${index + 1}. <@${player.userId}>**\n` +
+          `   Level: ${player.level} | XP: ${player.xp}\n`
+        );
+      })
       .buildEmbed();
-      
-    await interaction.reply({ embeds: [voiceLb] });
-    ```
-  </Step>
-</Steps>
 
-<Callout type="info" title="Entirely Automatic">
-`VoiceLeaderboardBuilder` filters arbitrary durations down to minute thresholds executing day/hour logic automatically prior to serving it inside your interface. Additional formatting commands are heavily mitigated.
-</Callout>
+    await interaction.reply({ embeds: [leaderboard] });
+  }
+}
+```
+
+## Voice Activity Leaderboard
+
+```typescript
+import {
+  Command,
+  VoiceLeaderboardBuilder,
+  VoiceActivityRepository,
+} from "@disapp/core";
+import { SlashCommandBuilder } from "discord.js";
+
+export default class VoiceStatsCommand extends Command {
+  constructor() {
+    super({
+      name: "voicestats",
+      description: "Show voice activity stats",
+      data: new SlashCommandBuilder()
+        .setName("voicestats")
+        .setDescription("Show voice activity stats"),
+      execute: async () => {},
+    });
+  }
+
+  async execute(interaction: any) {
+    const voiceRepo = new VoiceActivityRepository();
+    const stats = await voiceRepo.getWeeklyStats(BigInt(interaction.guildId));
+
+    if (stats.length === 0) {
+      await interaction.reply("No voice activity this week!");
+      return;
+    }
+
+    const leaderboard = new VoiceLeaderboardBuilder(stats)
+      .setTitle("🎙️ Weekly Voice Activity")
+      .setColor(0x5865f2)
+      .buildEmbed();
+
+    await interaction.reply({ embeds: [leaderboard] });
+  }
+}
+```
+
+## Features
+
+- **Automatic Formatting** - Converts data to readable format
+- **Time Conversion** - Milliseconds to hours/minutes automatically
+- **Customizable** - Full control over formatting
+- **Embed Ready** - Returns Discord embed objects
+- **Type Safe** - Full TypeScript support
+
+## Best Practices
+
+- **Limit Results** - Don't show too many entries (10-25 is ideal)
+- **Use Medals** - Add visual indicators for top positions
+- **Format Numbers** - Make large numbers readable
+- **Add Context** - Include time period or category
+- **Handle Empty** - Check for empty results
+
+## Learn More
+
+- [Database](/docs/database) - Repository documentation
+- [API Reference](/docs/api) - Complete leaderboard API
+- [Examples](/docs/examples) - More examples

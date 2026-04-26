@@ -1,0 +1,192 @@
+# Discord Components V2
+
+Discord's Components V2 system (released March 2025) provides a modern way to build rich, interactive messages with complete control over layout and styling.
+
+## Disapp v2() Builder
+
+Disapp provides a fluent API for building Components V2 messages easily:
+
+```typescript
+import { v2 } from "@disapp/core";
+import { ButtonStyle } from "discord.js";
+
+const message = v2()
+  .text("# Welcome")
+  .separator()
+  .buttons({
+    id: "btn1",
+    label: "Click me",
+    style: ButtonStyle.Primary,
+    onClick: async (i) => {
+      await i.reply("You clicked!");
+    },
+  })
+  .accentColor(0x5865f2)
+  .build();
+
+await interaction.reply(message);
+```
+
+## v2() Builder Methods
+
+| Method                                        | Description                           | Returns  |
+| --------------------------------------------- | ------------------------------------- | -------- |
+| `text(content)`                               | Add text display component            | `this`   |
+| `separator(divider?, spacing?)`               | Add separator component               | `this`   |
+| `buttons(...buttons)`                         | Add button row with onClick handlers  | `this`   |
+| `select(id, placeholder, options, onChange?)` | Add select menu with onChange handler | `this`   |
+| `accentColor(color)`                          | Set container accent color            | `this`   |
+| `enableAutoChunking(options?)`                | Enable auto-chunking for long text    | `this`   |
+| `build()`                                     | Build final message payload           | `object` |
+
+## Button Configuration
+
+```typescript
+interface ButtonConfig {
+  id?: string;
+  label?: string;
+  style: number;
+  emoji?: string;
+  url?: string;
+  disabled?: boolean;
+  onClick?: (i: any) => Promise<void> | void;
+}
+```
+
+### Example with onClick
+
+```typescript
+const message = v2()
+  .text("# Welcome")
+  .buttons(
+    {
+      id: "btn1",
+      label: "Click me",
+      style: ButtonStyle.Primary,
+      onClick: async (i) => {
+        await i.reply("You clicked button 1!");
+      },
+    },
+    {
+      id: "btn2",
+      label: "Another button",
+      style: ButtonStyle.Secondary,
+      onClick: async (i) => {
+        await i.reply("You clicked button 2!");
+      },
+    },
+  )
+  .build();
+```
+
+## Select Menus
+
+```typescript
+const message = v2()
+  .text("# Choose your language")
+  .select(
+    "language_select",
+    "Select a language",
+    [
+      { label: "English", value: "en", emoji: "🇺🇸" },
+      { label: "Turkish", value: "tr", emoji: "🇹🇷" },
+      { label: "German", value: "de", emoji: "🇩🇪" },
+    ],
+    async (i) => {
+      const language = i.values[0];
+      await i.reply(`You selected: ${language}`);
+    },
+  )
+  .build();
+```
+
+## Accent Colors
+
+Set the container's accent color (left border):
+
+```typescript
+v2().accentColor(0x5865f2); // Discord Blurple
+v2().accentColor(0x57f287); // Green
+v2().accentColor(0xfee75c); // Yellow
+v2().accentColor(0xed4245); // Red
+v2().accentColor(0x99aab5); // Gray
+```
+
+## Auto-Chunking
+
+Automatically split long text that exceeds Discord's 2000 character limit:
+
+```typescript
+const message = v2()
+  .enableAutoChunking({
+    maxLength: 2000,
+    preserveCodeBlocks: true,
+  })
+  .text(veryLongText)
+  .build();
+```
+
+## Complete Example
+
+```typescript
+import { v2 } from "@disapp/core";
+import { ButtonStyle } from "discord.js";
+
+export default class MenuCommand extends Command {
+  async execute(interaction: any) {
+    const message = v2()
+      .text("# Main Menu")
+      .separator()
+      .text("Choose an option below:")
+      .buttons(
+        {
+          id: "option1",
+          label: "Option 1",
+          style: ButtonStyle.Primary,
+          emoji: "1️⃣",
+          onClick: async (i) => {
+            await i.reply("You selected Option 1!");
+          },
+        },
+        {
+          id: "option2",
+          label: "Option 2",
+          style: ButtonStyle.Success,
+          emoji: "2️⃣",
+          onClick: async (i) => {
+            await i.reply("You selected Option 2!");
+          },
+        },
+      )
+      .select(
+        "action",
+        "Choose an action",
+        [
+          { label: "View Profile", value: "profile", emoji: "👤" },
+          { label: "Settings", value: "settings", emoji: "⚙️" },
+          { label: "Help", value: "help", emoji: "❓" },
+        ],
+        async (i) => {
+          const action = i.values[0];
+          await i.reply(`You chose: ${action}`);
+        },
+      )
+      .accentColor(0x5865f2)
+      .build();
+
+    await interaction.reply(message);
+  }
+}
+```
+
+## Benefits
+
+- **90% less code** - No manual collector setup
+- **Memory safe** - Auto cleanup after timeout
+- **Type safe** - Full TypeScript support
+- **Automatic handlers** - onClick/onChange callbacks registered automatically
+
+## Resources
+
+- [Official Discord Components V2 Documentation](https://docs.discord.com/developers/components/reference)
+- [Disapp Examples](https://github.com/dis-app/disapp/tree/main/examples)

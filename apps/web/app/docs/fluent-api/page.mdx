@@ -1,103 +1,233 @@
-<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Fluent Chaining</p>
 # Fluent API and Component Architecture
 
 Building UI or Discord interactions using classic `discord.js` often forces you into excessive "Builder" chaining (ActionRowBuilder, ButtonBuilder, EmbedBuilder). The Disapp `packages/core` provides a much smoother, single-line architecture.
 
-<br />
-
-## Next-Gen Components (Components V2)
+## Components V2 (Modern)
 
 We simplify the extensive button and menu construction process with the **Disapp V2 Components** structure. There's no longer a need to spread your row logic across massive file blocks.
 
-### Constructing Buttons via the `v2` Object
+### Constructing Messages with v2()
 
-You can design side-by-side buttons seamlessly using the `ComponentsV2Builder` (`v2`) module provided by the `core` framework.
+You can design interactive messages seamlessly using the `v2()` builder provided by the `core` framework.
 
 ```typescript
-import { v2 } from '@disapp/core';
-import { ButtonStyle } from 'discord.js';
+import { v2 } from "@disapp/core";
+import { ButtonStyle } from "discord.js";
 
-// An 18-line DJS structure converts into this with Disapp:
-const components = v2()
-  .button('accept_terms', 'Accept Terms', ButtonStyle.Success, '✅')
-  .button('decline', 'Decline', ButtonStyle.Danger)
+const message = v2()
+  .text("# Do you accept the agreement?")
+  .separator()
+  .buttons(
+    {
+      id: "accept_terms",
+      label: "Accept Terms",
+      style: ButtonStyle.Success,
+      emoji: "✅",
+      onClick: async (i) => {
+        await i.reply("Terms accepted!");
+      },
+    },
+    {
+      id: "decline",
+      label: "Decline",
+      style: ButtonStyle.Danger,
+      onClick: async (i) => {
+        await i.reply("Declined.");
+      },
+    },
+  )
+  .accentColor(0x5865f2)
   .build();
 
-await interaction.reply({
-  content: 'Do you accept the agreement?',
-  components: components // Action rows are compiled and ready.
-});
+await interaction.reply(message);
 ```
 
-<Callout type="info" title="The v2 Build Method">
-The moment `.build()` is invoked, it automatically distributes the provided buttons into 5-limit ActionRowBuilder packages (gracefully handling overflows if you provide more than 5 buttons).
-</Callout>
+### v2() Builder Methods
 
-<br />
+| Method                                        | Description                           | Returns  |
+| --------------------------------------------- | ------------------------------------- | -------- |
+| `text(content)`                               | Add text display component            | `this`   |
+| `separator(divider?, spacing?)`               | Add separator component               | `this`   |
+| `buttons(...buttons)`                         | Add button row with onClick handlers  | `this`   |
+| `select(id, placeholder, options, onChange?)` | Add select menu with onChange handler | `this`   |
+| `accentColor(color)`                          | Set container accent color            | `this`   |
+| `enableAutoChunking(options?)`                | Enable auto-chunking for long text    | `this`   |
+| `build()`                                     | Build final message payload           | `object` |
+
+### Select Menus
+
+```typescript
+const message = v2()
+  .text("# Choose an option")
+  .select(
+    "my_select",
+    "Select something",
+    [
+      { label: "Option A", value: "a", emoji: "🅰️" },
+      { label: "Option B", value: "b", emoji: "🅱️" },
+    ],
+    async (i) => {
+      const selected = i.values[0];
+      await i.reply(`You selected: ${selected}`);
+    },
+  )
+  .build();
+```
 
 ## Message Automation (Message Chunker)
 
 Discord enforces a strict character limit (maximum 2000 characters). If you exceed this limit when logging or sending long texts, a `DiscordAPIError` is thrown.
 
-Disapp contains a built-in `MessageChunker` and `AutoChunker` to bypass these limitations automatically.
+Disapp contains a built-in `AutoChunker` to bypass these limitations automatically.
 
-<Steps>
-  <Step title="Extract the String" stepNumber="1">
-    Retrieve your massive data output:
-    ```typescript
-    const massiveLog = "............. (5000 lines of text)";
-    ```
-  </Step>
-
-  <Step title="Process via AutoChunker" stepNumber="2">
-    Pass the raw payload into the module interface:
-    ```typescript
-    import { chunkMessage } from '@disapp/core';
-
-    // Safely slices the messages according to the 2000 character boundaries.
-    const messageArray = chunkMessage(massiveLog, { maxLength: 1990 });
-    ```
-  </Step>
-
-  <Step title="Sequential Output" stepNumber="3">
-    Loop through your paginated chunks:
-    ```typescript
-    for (const chunk of messageArray) {
-      await interaction.channel.send(chunk);
-    }
-    ```
-  </Step>
-</Steps>
-
-<br />
-
-## InteractionHandler and Event Listeners
-
-We've discontinued the need to build complex conditions like `if (interaction.customId === 'id')` when listening for "Interaction (Click)" triggers gathered from your buttons:
+### Auto-Chunking with v2()
 
 ```typescript
-import { InteractionHandler } from '@disapp/core';
+const message = v2()
+  .enableAutoChunking({
+    maxLength: 2000,
+    preserveCodeBlocks: true,
+  })
+  .text(veryLongText)
+  .build();
+```
 
-// Construct your Button and Menu handler
-const handler = new InteractionHandler();
+### Manual Chunking
 
-// Map Button Actions
-handler.registerButton('accept_terms', async (interaction) => {
-    await interaction.reply("Terms accepted!");
+```typescript
+import { AutoChunker } from "@disapp/core";
+
+const longText = "..."; // 5000 characters
+const chunks = AutoChunker.autoChunk(longText, {
+  maxLength: 2000,
+  preserveCodeBlocks: true,
 });
 
-handler.registerButton('decline', async (interaction) => {
-    await interaction.reply("Declined.");
-});
-
-// Execute the Handler within your Event listener
-export default class InteractionCreateEvent extends Event {
-    async execute(client, interaction) {
-        if (!interaction.isButton()) return;
-        
-        await handler.execute(interaction);
-    }
+for (const chunk of chunks) {
+  await interaction.channel.send(chunk);
 }
 ```
 
-By decoupling your interaction systems into distinct function callbacks, your codebase remains clean, isolated, and highly "Fluent".
+## Components V1 (Legacy)
+
+For traditional Discord.js components, use the `msg()` builder:
+
+```typescript
+import { msg, embed, ButtonStyle } from "@disapp/core";
+
+const message = msg()
+  .setContent("Welcome!")
+  .buttons(
+    { label: "Accept", id: "accept", style: ButtonStyle.Success },
+    { label: "Decline", id: "decline", style: ButtonStyle.Danger },
+  )
+  .addEmbed(
+    embed()
+      .setTitle("Terms of Service")
+      .setDescription("Please read and accept our terms")
+      .setColor(0x5865f2),
+  )
+  .build();
+
+await interaction.reply(message);
+```
+
+## Shortcuts
+
+### Button Shortcuts
+
+```typescript
+import { confirm, yesNo, primary, danger } from "@disapp/core";
+
+confirm("confirm_id", "cancel_id");
+yesNo("yes_id", "no_id");
+primary("Edit", "edit_id");
+danger("Delete", "delete_id");
+```
+
+### Embed Shortcuts
+
+```typescript
+import {
+  successEmbed,
+  errorEmbed,
+  warningEmbed,
+  infoEmbed,
+} from "@disapp/core";
+
+successEmbed("Success!", "Operation completed");
+errorEmbed("Error!", "Something went wrong");
+warningEmbed("Warning!", "Be careful");
+infoEmbed("Info", "Here is some information");
+```
+
+## Complete Example
+
+```typescript
+import { Command, v2 } from "@disapp/core";
+import { SlashCommandBuilder, ButtonStyle } from "discord.js";
+
+export default class MenuCommand extends Command {
+  constructor() {
+    super({
+      name: "menu",
+      description: "Show interactive menu",
+      data: new SlashCommandBuilder()
+        .setName("menu")
+        .setDescription("Show interactive menu"),
+      execute: async () => {},
+    });
+  }
+
+  async execute(interaction: any) {
+    const message = v2()
+      .text("# Main Menu")
+      .separator()
+      .text("Choose an option below:")
+      .buttons(
+        {
+          id: "option1",
+          label: "Option 1",
+          style: ButtonStyle.Primary,
+          emoji: "1️⃣",
+          onClick: async (i) => {
+            await i.reply("You selected Option 1!");
+          },
+        },
+        {
+          id: "option2",
+          label: "Option 2",
+          style: ButtonStyle.Success,
+          emoji: "2️⃣",
+          onClick: async (i) => {
+            await i.reply("You selected Option 2!");
+          },
+        },
+      )
+      .select(
+        "action",
+        "Choose an action",
+        [
+          { label: "View Profile", value: "profile", emoji: "👤" },
+          { label: "Settings", value: "settings", emoji: "⚙️" },
+          { label: "Help", value: "help", emoji: "❓" },
+        ],
+        async (i) => {
+          const action = i.values[0];
+          await i.reply(`You chose: ${action}`);
+        },
+      )
+      .accentColor(0x5865f2)
+      .build();
+
+    await interaction.reply(message);
+  }
+}
+```
+
+## Learn More
+
+- [Components V2](/docs/components-v2) - Complete Components V2 guide
+- [Components V1](/docs/components) - Legacy components guide
+- [Message Chunking](/docs/message-chunking) - Auto-chunking documentation
+- [Examples](/docs/examples) - More examples

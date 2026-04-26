@@ -1,0 +1,150 @@
+# Message Chunking
+
+The Message Chunking system automatically splits long messages into multiple chunks to comply with Discord's 2000 character limit.
+
+## Auto-Chunking with v2() Builder
+
+The modern way to handle long text in Components V2 messages:
+
+```typescript
+import { v2 } from "@disapp/core";
+
+const longText = "Very long text that exceeds 2000 characters...";
+
+const message = v2().enableAutoChunking().text(longText).build();
+
+await interaction.reply(message);
+```
+
+## Auto-Chunking Options
+
+```typescript
+interface AutoChunkerOptions {
+  maxLength?: number;
+  preserveCodeBlocks?: boolean;
+  preserveMarkdown?: boolean;
+  separator?: string;
+}
+```
+
+### Custom Max Length
+
+```typescript
+const message = v2()
+  .enableAutoChunking({
+    maxLength: 1500,
+  })
+  .text(veryLongText)
+  .build();
+```
+
+### With Code Block Preservation
+
+```typescript
+const message = v2()
+  .enableAutoChunking({
+    maxLength: 2000,
+    preserveCodeBlocks: true,
+    preserveMarkdown: true,
+  })
+  .text(
+    `
+# Documentation
+
+\`\`\`typescript
+function example() {
+  return 'hello';
+}
+\`\`\`
+
+More content here...
+  `,
+  )
+  .build();
+```
+
+## AutoChunker Standalone Class
+
+For manual chunking outside of v2() builder:
+
+```typescript
+import { AutoChunker } from "@disapp/core";
+
+const longText = "...";
+const chunks = AutoChunker.autoChunk(longText, {
+  maxLength: 2000,
+  preserveCodeBlocks: true,
+});
+
+for (const chunk of chunks) {
+  await channel.send(chunk);
+}
+```
+
+## Features
+
+- Automatic message splitting at 2000 characters (or custom limit)
+- Code block preservation (never breaks code blocks)
+- Smart splitting at line breaks
+- Customizable separators, prefixes, and suffixes
+- Works with MessageBuilder and v2() builder
+
+## Complete Example
+
+```typescript
+import { v2 } from "@disapp/core";
+import { ButtonStyle } from "discord.js";
+
+const message = v2()
+  .enableAutoChunking({
+    maxLength: 2000,
+    preserveCodeBlocks: true,
+  })
+  .text(longDocumentation)
+  .separator()
+  .buttons(
+    {
+      id: "prev",
+      label: "Previous",
+      style: ButtonStyle.Secondary,
+      onClick: async (i) => {
+        await i.reply("Previous page");
+      },
+    },
+    {
+      id: "next",
+      label: "Next",
+      style: ButtonStyle.Secondary,
+      onClick: async (i) => {
+        await i.reply("Next page");
+      },
+    },
+  )
+  .build();
+
+await interaction.reply(message);
+```
+
+## Code Block Handling
+
+The chunker intelligently handles code blocks:
+
+- Never breaks code blocks in the middle
+- Preserves language syntax highlighting
+- Automatically closes and reopens code blocks across chunks
+
+## Best Practices
+
+1. **Enable auto-chunking for user-generated content** - Prevent errors
+2. **Preserve code blocks** - Maintains syntax highlighting
+3. **Use appropriate maxLength** - Consider Discord's 2000 limit
+4. **Use meaningful separators** - '\n' for paragraphs, '. ' for sentences
+
+## Performance
+
+The chunker is optimized for:
+
+- Large messages (10,000+ characters)
+- Multiple code blocks
+- Mixed content (text + code)
+- Minimal memory allocation

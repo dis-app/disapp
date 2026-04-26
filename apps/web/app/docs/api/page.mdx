@@ -1,0 +1,414 @@
+# API Reference
+
+Complete API reference for Disapp framework.
+
+## Core Classes
+
+### DisappClient
+
+Main client class that extends Discord.js Client.
+
+```typescript
+import { DisappClient } from '@disapp/core';
+
+const client = new DisappClient({
+  intents: [GatewayIntentBits.Guilds],
+  config: {
+    token: string,
+    clientId: string,
+    guildId?: string,
+    commandsPath: string,
+    eventsPath: string,
+    database?: {
+      url: string
+    }
+  }
+});
+
+await client.start();
+```
+
+### Command
+
+Base class for creating commands.
+
+```typescript
+import { Command } from '@disapp/core';
+
+export default class MyCommand extends Command {
+  constructor() {
+    super({
+      name: string,
+      description: string,
+      data: SlashCommandBuilder,
+      execute: async () => {},
+      middlewares?: MiddlewareFunction[],
+      cooldown?: number
+    });
+  }
+
+  async execute(interaction: any): Promise<void> {
+    // Command logic
+  }
+}
+```
+
+### Event
+
+Base class for creating events.
+
+```typescript
+import { Event } from "@disapp/core";
+
+export default class MyEvent extends Event {
+  constructor() {
+    super({
+      name: string,
+      once: boolean,
+      execute: async () => {},
+    });
+  }
+
+  async execute(...args: any[]): Promise<void> {
+    // Event logic
+  }
+}
+```
+
+## Builders
+
+### v2() - Components V2 Builder
+
+```typescript
+import { v2 } from '@disapp/core';
+
+v2()
+  .text(content: string)
+  .separator(divider?: boolean, spacing?: number)
+  .buttons(...buttons: ButtonConfig[])
+  .select(id: string, placeholder: string, options: SelectOption[], onChange?: Function)
+  .accentColor(color: number)
+  .enableAutoChunking(options?: AutoChunkerOptions)
+  .build()
+```
+
+### msg() - Message Builder
+
+```typescript
+import { msg } from '@disapp/core';
+
+msg()
+  .setContent(content: string)
+  .buttons(...buttons: ButtonConfig[])
+  .stringSelect(id: string, options: SelectOption[], placeholder?: string)
+  .userSelect(id: string, placeholder: string, minMax: [number, number])
+  .roleSelect(id: string, placeholder: string, minMax: [number, number])
+  .channelSelect(id: string, placeholder: string, minMax: [number, number])
+  .addEmbed(embed: EmbedBuilder)
+  .build()
+```
+
+### embed() - Embed Builder
+
+```typescript
+import { embed } from '@disapp/core';
+
+embed()
+  .setTitle(title: string)
+  .setDescription(description: string)
+  .setColor(color: number)
+  .addFields(...fields: EmbedField[])
+  .setThumbnail(url: string)
+  .setImage(url: string)
+  .setFooter(text: string, iconURL?: string)
+  .setTimestamp()
+  .build()
+```
+
+## Middleware
+
+### Built-in Middleware
+
+```typescript
+import {
+  OnlyAdmin,
+  RequirePermission,
+  Cooldown,
+  RateLimit,
+  RequireDatabase,
+  RequireGuild,
+  RequireRole,
+  OwnerOnly
+} from '@disapp/core';
+
+OnlyAdmin()
+RequirePermission(permission: bigint)
+Cooldown(ms: number)
+RateLimit(maxUses: number, windowMs: number)
+RequireDatabase()
+RequireGuild()
+RequireRole(roleId: string)
+OwnerOnly(ownerId: string)
+```
+
+### Custom Middleware
+
+```typescript
+import { MiddlewareFunction } from "@disapp/core";
+
+function MyMiddleware(): MiddlewareFunction {
+  return async (ctx) => {
+    // Middleware logic
+    if (condition) {
+      await ctx.interaction.reply("Error message");
+      return false;
+    }
+    return true;
+  };
+}
+```
+
+## Database
+
+### Repositories
+
+```typescript
+import {
+  UserRepository,
+  GuildRepository,
+  UserStatsRepository,
+  VoiceActivityRepository,
+} from "@disapp/core";
+
+const userRepo = new UserRepository();
+const guildRepo = new GuildRepository();
+const statsRepo = new UserStatsRepository();
+const voiceRepo = new VoiceActivityRepository();
+```
+
+### UserRepository
+
+```typescript
+await userRepo.getOrCreate(userId: bigint, username: string, avatar?: string)
+await userRepo.findById(userId: bigint)
+await userRepo.update(user: User)
+await userRepo.delete(userId: bigint)
+```
+
+### GuildRepository
+
+```typescript
+await guildRepo.getOrCreate(guildId: bigint, name: string)
+await guildRepo.findById(guildId: bigint)
+await guildRepo.update(guild: Guild)
+await guildRepo.delete(guildId: bigint)
+```
+
+### UserStatsRepository
+
+```typescript
+await statsRepo.getOrCreate(userId: bigint, guildId: bigint)
+await statsRepo.addXP(userId: bigint, guildId: bigint, amount: number)
+await statsRepo.getTopPlayers(guildId: bigint, limit: number)
+```
+
+### VoiceActivityRepository
+
+```typescript
+await voiceRepo.startSession(userId: bigint, guildId: bigint, channelId: bigint)
+await voiceRepo.endSession(userId: bigint, guildId: bigint)
+await voiceRepo.getWeeklyStats(guildId: bigint)
+```
+
+## Internationalization
+
+### I18n
+
+```typescript
+import { I18n } from '@disapp/core';
+
+const i18n = I18n.getInstance({
+  defaultLanguage: string,
+  fallbackLanguage: string,
+  localesPath: string
+});
+
+await i18n.loadLocales(path: string)
+i18n.t(key: string, language?: string, params?: Record<string, any>)
+i18n.addLocale(language: string, translations: Record<string, any>)
+i18n.getLanguages()
+i18n.hasLanguage(language: string)
+```
+
+### I18nHelper
+
+```typescript
+import { I18nHelper } from '@disapp/core';
+
+I18nHelper.t(key: string, language?: string, params?: Record<string, any>)
+I18nHelper.tUser(userId: string, key: string, params?: Record<string, any>)
+I18nHelper.setUserLanguage(userId: string, language: string)
+I18nHelper.getUserLanguage(userId: string)
+I18nHelper.button(labelKey: string, language?: string, params?: Record<string, any>)
+I18nHelper.modal(titleKey: string, language?: string, params?: Record<string, any>)
+I18nHelper.message(messageKey: string, language?: string, params?: Record<string, any>)
+I18nHelper.error(errorKey: string, language?: string, params?: Record<string, any>)
+I18nHelper.command(commandKey: string, language?: string, params?: Record<string, any>)
+I18nHelper.embed(embedKey: string, language?: string, params?: Record<string, any>)
+```
+
+## Utilities
+
+### AutoChunker
+
+```typescript
+import { AutoChunker } from '@disapp/core';
+
+AutoChunker.autoChunk(text: string, options?: AutoChunkerOptions)
+
+interface AutoChunkerOptions {
+  maxLength?: number;
+  preserveCodeBlocks?: boolean;
+  preserveMarkdown?: boolean;
+  separator?: string;
+}
+```
+
+### DynamicConfig
+
+```typescript
+import { DynamicConfig } from '@disapp/core';
+
+const config = DynamicConfig.getInstance(path?: string);
+
+config.get(key: string)
+config.set(key: string, value: any)
+config.update(updates: Record<string, any>)
+config.getAll()
+config.reset()
+config.isMaintenanceMode()
+config.isFeatureEnabled(feature: string)
+config.setCustom(key: string, value: any)
+config.getCustom(key: string)
+
+config.on('loaded', (config) => {})
+config.on('changed', (newConfig, oldConfig) => {})
+config.on('updated', (key, value) => {})
+config.on('reset', (config) => {})
+```
+
+### HotReload
+
+```typescript
+import { HotReload } from '@disapp/core';
+
+const hotReload = new HotReload(client: DisappClient);
+
+hotReload.watchCommands()
+hotReload.watchEvents()
+```
+
+### VoiceTracker
+
+```typescript
+import { VoiceTracker } from '@disapp/core';
+
+const tracker = new VoiceTracker(client: DisappClient);
+
+await tracker.handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState)
+```
+
+## Shortcuts
+
+### Button Shortcuts
+
+```typescript
+import { confirm, yesNo, primary, danger, success, secondary, row } from '@disapp/core';
+
+confirm(confirmId: string, cancelId: string)
+yesNo(yesId: string, noId: string)
+primary(label: string, id: string)
+danger(label: string, id: string)
+success(label: string, id: string)
+secondary(label: string, id: string)
+row(...buttons: ButtonBuilder[])
+```
+
+### Embed Shortcuts
+
+```typescript
+import { successEmbed, errorEmbed, warningEmbed, infoEmbed } from '@disapp/core';
+
+successEmbed(title: string, description: string)
+errorEmbed(title: string, description: string)
+warningEmbed(title: string, description: string)
+infoEmbed(title: string, description: string)
+```
+
+## Types
+
+### ButtonConfig
+
+```typescript
+interface ButtonConfig {
+  id?: string;
+  label?: string;
+  style: number;
+  emoji?: string;
+  url?: string;
+  disabled?: boolean;
+  onClick?: (i: any) => Promise<void> | void;
+}
+```
+
+### SelectOption
+
+```typescript
+interface SelectOption {
+  label: string;
+  value: string;
+  emoji?: string;
+  description?: string;
+  default?: boolean;
+}
+```
+
+### MiddlewareContext
+
+```typescript
+interface MiddlewareContext {
+  interaction: any;
+  command: any;
+  next: () => Promise<void>;
+}
+```
+
+### MiddlewareFunction
+
+```typescript
+type MiddlewareFunction = (ctx: MiddlewareContext) => Promise<boolean | void>;
+```
+
+## Constants
+
+### ButtonStyle
+
+```typescript
+import { ButtonStyle } from "discord.js";
+
+ButtonStyle.Primary; // 1 - Blurple
+ButtonStyle.Secondary; // 2 - Grey
+ButtonStyle.Success; // 3 - Green
+ButtonStyle.Danger; // 4 - Red
+ButtonStyle.Link; // 5 - Grey with URL
+```
+
+### Colors
+
+```typescript
+0x5865f2; // Discord Blurple
+0x57f287; // Green
+0xfee75c; // Yellow
+0xed4245; // Red
+0x99aab5; // Gray
+```

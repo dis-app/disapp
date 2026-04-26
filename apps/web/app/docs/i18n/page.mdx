@@ -1,82 +1,286 @@
-<p className="text-blue-500 font-semibold mb-2 mt-4 text-[13px] uppercase tracking-wide">Multi-Language Ecosystem</p>
 # Built-In Locales (i18n)
 
 If you are expanding globally or catering to multilingual communities, you can leverage Disapp's deeply integrated **i18n (Internationalization)** mechanism to dynamically deploy responses depending on the application language registered by the Discord user.
-
-<br />
 
 ## How it Works
 
 Disapp Core natively features an `I18n` class. Utilizing local directories, it evaluates files ending in `.json` and streams their payload immediately into cached Memory (RAM), yielding lightning-fast language swaps.
 
-<Steps>
-  <Step title="Establish Directory Locales" stepNumber="1">
-    Navigate to your root directory and deploy a folder titled `locales` alongside configuration entries such as `en-US.json` and `tr.json`.
+## Setup
 
-    ```json
-    // locales/en-US.json
-    {
-      "hello": "Hello World!",
-      "welcomeUser": "Welcome to the server, {user}"
-    }
+### 1. Create Locale Files
 
-    // locales/tr.json
-    {
-      "hello": "Merhaba Dünya!",
-      "welcomeUser": "Sunucuya hoş geldin, {user}"
-    }
-    ```
-  </Step>
+Create a `locales` folder in your bot project:
 
-  <Step title="Invoke the i18n Integrator" stepNumber="2">
-    In the primary gateway (`index.ts`) of your bot context, instantiate the module.
-
-    ```typescript
-    import { I18n } from '@disapp/core';
-    import path from 'path';
-
-    // Asynchronously dispatch locales independently alongside the DisappClient
-    const i18n = new I18n({
-      localesPath: path.join(__dirname, 'locales'),
-      defaultLocale: 'en-US'  // Dictates a fail-safe fallback route
-    });
-
-    await i18n.loadLocales();
-    ```
-  </Step>
-
-  <Step title="Resolve Text Chains" stepNumber="3">
-    Within the `execute` block context of your commands, generating a localization is trivial:
-
-    ```typescript
-    async execute(interaction) {
-      // Discern language dynamically through interaction properties
-      const locale = interaction.locale;
-
-      // Extract via the string key, letting i18n inject the contextual mapping
-      const replyMessage = i18n.translate(locale, 'welcomeUser', { 
-        user: interaction.user.username 
-      });
-
-      await interaction.reply(replyMessage);
-    }
-    ```
-  </Step>
-</Steps>
-
-<br />
-
-## The I18nHelper Interface
-
-Instead of blindly invoking translations, if you desire deeper resolutions utilizing database mappings for forced languages outshining discord presets, you should instantiate `I18nHelper`.
-
-```typescript
-import { I18nHelper } from '@disapp/core';
-
-const userPreferredLanguage = await db.getUserLanguage(interaction.user.id);
-const finalLocale = I18nHelper.resolveLocale(interaction.locale, userPreferredLanguage);
+```
+locales/
+├── en.json
+├── tr.json
+├── de.json
+└── fr.json
 ```
 
-<Callout type="info" title="Automatic Fallback Routing">
-If a user happens to interact with the bot using German (`de`) and you primarily facilitate `tr` and `en-US`, the execution chain won't shatter; it seamlessly routes backward toward your target `defaultLocale` designation.
-</Callout>
+### 2. Define Translations
+
+**locales/en.json**
+
+```json
+{
+  "commands": {
+    "ping": {
+      "description": "Bot latency",
+      "response": "🏓 Pong! {latency}ms"
+    }
+  },
+  "buttons": {
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "errors": {
+    "noPermission": "❌ You don't have permission!"
+  }
+}
+```
+
+**locales/tr.json**
+
+```json
+{
+  "commands": {
+    "ping": {
+      "description": "Bot gecikmesi",
+      "response": "🏓 Pong! {latency}ms"
+    }
+  },
+  "buttons": {
+    "confirm": "Onayla",
+    "cancel": "İptal"
+  },
+  "errors": {
+    "noPermission": "❌ Yetkiniz yok!"
+  }
+}
+```
+
+### 3. Initialize i18n
+
+```typescript
+import { I18n } from "@disapp/core";
+import path from "path";
+
+const i18n = I18n.getInstance({
+  defaultLanguage: "en",
+  fallbackLanguage: "en",
+  localesPath: path.join(__dirname, "../locales"),
+});
+
+await i18n.loadLocales(path.join(__dirname, "../locales"));
+```
+
+### 4. Use in Commands
+
+```typescript
+import { Command, I18nHelper } from "@disapp/core";
+import { SlashCommandBuilder } from "discord.js";
+
+export default class PingCommand extends Command {
+  async execute(interaction: any) {
+    const lang = interaction.locale?.split("-")[0] || "en";
+    const latency = Math.round(interaction.client.ws.ping);
+
+    const message = I18nHelper.command("ping.response", lang, { latency });
+    await interaction.reply(message);
+  }
+}
+```
+
+## I18nHelper Methods
+
+### t() - Generic Translation
+
+Works with ANY key structure:
+
+```typescript
+I18nHelper.t("commands.ping.response", "en", { latency: 50 });
+I18nHelper.t("ticket.created", "en");
+I18nHelper.t("custom.nested.key", "en", { param: "value" });
+```
+
+### tUser() - User-Specific Translation
+
+Translate using the user's preferred language:
+
+```typescript
+I18nHelper.setUserLanguage("user123", "tr");
+
+const message = I18nHelper.tUser("user123", "commands.ping.response", {
+  latency: 50,
+});
+```
+
+### setUserLanguage() - Set User Language
+
+```typescript
+I18nHelper.setUserLanguage("user123", "tr");
+I18nHelper.setUserLanguage("user456", "de");
+```
+
+### getUserLanguage() - Get User Language
+
+```typescript
+const userLang = I18nHelper.getUserLanguage("user123");
+console.log(userLang); // 'tr'
+```
+
+### Shortcut Methods
+
+```typescript
+I18nHelper.button("confirm", "en");
+I18nHelper.modal("settings", "en");
+I18nHelper.message("welcome", "en");
+I18nHelper.error("noPermission", "en");
+I18nHelper.command("ping.response", "en", { latency: 50 });
+I18nHelper.embed("welcome", "en");
+```
+
+## Usage Examples
+
+### Basic Command with User Language
+
+```typescript
+import { Command, I18nHelper } from "@disapp/core";
+import { SlashCommandBuilder } from "discord.js";
+
+export default class PingCommand extends Command {
+  async execute(interaction: any) {
+    const userId = interaction.user.id;
+    const latency = Math.round(interaction.client.ws.ping);
+
+    const message = I18nHelper.tUser(userId, "commands.ping.response", {
+      latency: latency.toString(),
+    });
+
+    await interaction.reply(message);
+  }
+}
+```
+
+### Language Selection Command
+
+```typescript
+import { Command, I18nHelper } from "@disapp/core";
+import { SlashCommandBuilder } from "discord.js";
+
+export default class LanguageCommand extends Command {
+  async execute(interaction: any) {
+    const userId = interaction.user.id;
+    const language = interaction.options.getString("language");
+
+    I18nHelper.setUserLanguage(userId, language);
+
+    const message = I18nHelper.tUser(userId, "commands.language.success");
+    await interaction.reply(message);
+  }
+}
+```
+
+### Components V2 with i18n
+
+```typescript
+import { Command, v2, I18nHelper } from "@disapp/core";
+import { SlashCommandBuilder, ButtonStyle } from "discord.js";
+
+export default class MenuCommand extends Command {
+  async execute(interaction: any) {
+    const lang = interaction.locale?.split("-")[0] || "en";
+    const t = (key: string, params?: Record<string, any>) =>
+      I18nHelper.t(key, lang, params);
+
+    const message = v2()
+      .text(`# ${t("menu.title")}`)
+      .separator()
+      .text(t("menu.description"))
+      .buttons(
+        {
+          id: "confirm",
+          label: I18nHelper.button("confirm", lang),
+          style: ButtonStyle.Success,
+          onClick: async (i) => {
+            await i.reply(t("menu.confirmed"));
+          },
+        },
+        {
+          id: "cancel",
+          label: I18nHelper.button("cancel", lang),
+          style: ButtonStyle.Danger,
+          onClick: async (i) => {
+            await i.reply(t("menu.cancelled"));
+          },
+        },
+      )
+      .build();
+
+    await interaction.reply(message);
+  }
+}
+```
+
+## Translation File Structure
+
+You can organize translations however you want:
+
+```json
+{
+  "commands": {
+    "ping": { "response": "..." }
+  },
+  "buttons": { "confirm": "..." },
+  "messages": { "welcome": "..." },
+  "errors": { "noPermission": "..." },
+  "ticket": {
+    "created": "🎫 Ticket created!",
+    "closed": "🎫 Ticket closed!"
+  }
+}
+```
+
+## Parameter Substitution
+
+Use `{paramName}` syntax for dynamic values:
+
+```json
+{
+  "commands": {
+    "ban": {
+      "success": "✅ **{user}** has been banned.",
+      "reason": "📝 Reason: {reason}"
+    }
+  }
+}
+```
+
+```typescript
+const message = I18nHelper.command("ban.success", "en", {
+  user: "John",
+  reason: "Spam",
+});
+```
+
+## Automatic Fallback
+
+If a user happens to interact with the bot using German (`de`) and you primarily facilitate `tr` and `en`, the execution chain won't shatter; it seamlessly routes backward toward your target `defaultLanguage` designation.
+
+## Best Practices
+
+- **Organize by category** - Use nested objects
+- **Use consistent naming** - Follow a naming convention
+- **Provide fallback language** - Always have English as fallback
+- **Use parameters** - Avoid hardcoding values
+- **Keep translations updated** - Maintain all language files together
+- **Test all languages** - Verify translations work correctly
+
+## Learn More
+
+- [API Reference](/docs/api) - Complete i18n API
+- [Examples](/docs/examples) - i18n usage examples
+- [Advanced Features](/docs/advanced-features) - Advanced i18n patterns
