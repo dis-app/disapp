@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import { AlignLeft, Search, Command } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import Link from "next/link";
+import { AlignLeft, Search, Command } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function DocsLayout({
   children,
@@ -10,17 +10,18 @@ export default function DocsLayout({
   return (
     <div className="flex min-h-screen bg-white dark:bg-[#09090b]">
       <aside className="w-72 fixed inset-y-0 left-0 pt-8 pb-8 px-5 overflow-y-auto border-r border-gray-100 dark:border-gray-800/60 hidden md:flex flex-col bg-[#fdfdfd] dark:bg-[#09090b] z-40 custom-scrollbar">
-        
         <div className="flex items-center justify-between mb-8 px-1">
           <Link href="/" className="flex items-center gap-0.5 shrink-0 group">
-            <img 
-              src="/disapp.svg" 
-              alt="d Logo" 
-              width={64} 
-              height={64} 
-              className="transition-opacity group-hover:opacity-80 [image-rendering:pixelated]" 
+            <img
+              src="/disapp.svg"
+              alt="d Logo"
+              width={64}
+              height={64}
+              className="transition-opacity group-hover:opacity-80 [image-rendering:pixelated]"
             />
-            <span className="font-extrabold text-3xl leading-tight text-gray-900 dark:text-white tracking-tighter mt-1">isapp.</span>
+            <span className="font-extrabold text-3xl leading-tight text-gray-900 dark:text-white tracking-tighter mt-1">
+              isapp.
+            </span>
           </Link>
           <ThemeToggle />
         </div>
@@ -28,9 +29,9 @@ export default function DocsLayout({
         <div className="mb-8 px-1">
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
-            <input 
-              type="text" 
-              placeholder="Search wiki..." 
+            <input
+              type="text"
+              placeholder="Search wiki..."
               className="w-full bg-white dark:bg-[#111115] border border-gray-200 dark:border-gray-800 rounded-lg pl-9 pr-14 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 pointer-events-none">
@@ -43,27 +44,190 @@ export default function DocsLayout({
 
         <nav className="flex flex-col gap-8 text-[14px] px-1">
           <div>
-            <h4 className="font-bold text-gray-900 dark:text-white mb-3 text-[13px]">Getting Started</h4>
+            <h4 className="font-bold text-gray-900 dark:text-white mb-3 text-[13px]">
+              Getting Started
+            </h4>
             <ul className="space-y-1 flex flex-col border-l border-gray-200 dark:border-gray-800/80 ml-1">
-              <li><Link href="/docs" className="block py-1.5 pl-4 -ml-[1px] border-l border-blue-500 text-blue-600 dark:text-blue-400 font-medium">Introduction to Disapp</Link></li>
-              <li><Link href="/docs/installation" className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Installation</Link></li>
+              <li>
+                <Link
+                  href="/docs"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-blue-500 text-blue-600 dark:text-blue-400 font-medium"
+                >
+                  Introduction to Disapp
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/installation"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Installation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/quick-start"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Quick Start
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/getting-started"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Getting Started Guide
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 dark:text-white mb-3 text-[13px]">Dive Deeper (Creators)</h4>
+            <h4 className="font-bold text-gray-900 dark:text-white mb-3 text-[13px]">
+              Core Concepts
+            </h4>
             <ul className="space-y-1 flex flex-col border-l border-gray-200 dark:border-gray-800/80 ml-1">
-              <li><Link href="/docs/commands" className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Advanced Commands</Link></li>
-              <li><Link href="/docs/events" className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Modules and Events</Link></li>
-              <li><Link href="/docs/fluent-api" className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Fluent API Management</Link></li>
-              <li><Link href="/docs/hot-reload" className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Live Hot Reload</Link></li>
+              <li>
+                <Link
+                  href="/docs/commands"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Commands
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/events"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Events
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/middleware"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Middleware
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/database"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Database
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/hot-reload"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Hot Reload
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 dark:text-white mb-3 text-[13px]">Addons & Infrastructure</h4>
+            <h4 className="font-bold text-gray-900 dark:text-white mb-3 text-[13px]">
+              Components & UI
+            </h4>
             <ul className="space-y-1 flex flex-col border-l border-gray-200 dark:border-gray-800/80 ml-1">
-              <li><Link href="/docs/database" className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Database Layer</Link></li>
-              <li><Link href="/docs/i18n" className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Multi-Language (i18n)</Link></li>
-              <li><Link href="/docs/leaderboard" className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Leaderboard Builder</Link></li>
+              <li>
+                <Link
+                  href="/docs/components"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Components V1
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/components-v2"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Components V2
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/fluent-api"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Fluent API
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/message-chunking"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Message Chunking
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-900 dark:text-white mb-3 text-[13px]">
+              Features
+            </h4>
+            <ul className="space-y-1 flex flex-col border-l border-gray-200 dark:border-gray-800/80 ml-1">
+              <li>
+                <Link
+                  href="/docs/i18n"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  i18n (Multi-Language)
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/leaderboard"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Leaderboard Builder
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/advanced-features"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Advanced Features
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-900 dark:text-white mb-3 text-[13px]">
+              Resources
+            </h4>
+            <ul className="space-y-1 flex flex-col border-l border-gray-200 dark:border-gray-800/80 ml-1">
+              <li>
+                <Link
+                  href="/docs/api"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  API Reference
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/examples"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Examples
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/comparison"
+                  className="block py-1.5 pl-4 -ml-[1px] border-l border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  Disapp vs Discord.js
+                </Link>
+              </li>
             </ul>
           </div>
         </nav>
@@ -83,10 +247,18 @@ export default function DocsLayout({
             <AlignLeft className="w-4 h-4" /> On this page
           </h5>
           <ul className="space-y-2.5 text-[13px] font-medium text-gray-500 dark:text-gray-400 border-l border-gray-200 dark:border-gray-800/80">
-            <li className="pl-4 border-l border-blue-500 text-blue-600 dark:text-blue-400 -ml-[1px] cursor-pointer">What is Disapp?</li>
-            <li className="pl-4 border-l border-transparent hover:text-gray-900 dark:hover:text-gray-200 cursor-pointer transition-colors">Core Concepts</li>
-            <li className="pl-4 border-l border-transparent hover:text-gray-900 dark:hover:text-gray-200 cursor-pointer transition-colors">Modules</li>
-            <li className="pl-4 border-l border-transparent hover:text-gray-900 dark:hover:text-gray-200 cursor-pointer transition-colors">Deprecation Guide</li>
+            <li className="pl-4 border-l border-blue-500 text-blue-600 dark:text-blue-400 -ml-[1px] cursor-pointer">
+              What is Disapp?
+            </li>
+            <li className="pl-4 border-l border-transparent hover:text-gray-900 dark:hover:text-gray-200 cursor-pointer transition-colors">
+              Core Concepts
+            </li>
+            <li className="pl-4 border-l border-transparent hover:text-gray-900 dark:hover:text-gray-200 cursor-pointer transition-colors">
+              Modules
+            </li>
+            <li className="pl-4 border-l border-transparent hover:text-gray-900 dark:hover:text-gray-200 cursor-pointer transition-colors">
+              Deprecation Guide
+            </li>
           </ul>
         </div>
       </aside>
